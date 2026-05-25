@@ -1,0 +1,38 @@
+
+.topbar {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    box-shadow: #e2e8f0 0px 4px 6px;
+}
+
+.topbar-left h1 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.topbar-left p {
+    color: #666;
+    font-size: 14px;
+}
+
+.topbar-right .btn-primary {
+  background: transparent;
+    color: #333;
+    border: #f4f7fa solid 2px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.topbar-right .btn-primary:hover {
+  border: #c00040 solid 2px;
+  color: #c00040;
+}

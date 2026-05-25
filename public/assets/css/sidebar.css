@@ -1,0 +1,76 @@
+
+#navigation {
+    font-weight: bold;
+    padding: 12px 25px;
+}
+
+
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px;
+    height: 100vh;
+    background:#f4f7fa;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    box-shadow: #e2e8f0 0px 4px 6px;
+    z-index: 100;
+}
+
+hr {
+    border-color: #e2e8f0;
+    margin-top: 35px;
+    margin-bottom: 35px;
+
+} 
+
+.sidebar-logo {
+    color: #e1496a;
+    padding-top: 40px;
+    padding-bottom: 20px;
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar a {
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 12px 25px;
+    display: block;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.sidebar a:hover {
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+    border-left: 3px solid #c00040;
+    background-color: #fbeaf0;
+    color: #993556;
+    transition-duration: 0.2s;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 90px;
+}
+
+.user-info .name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.user-info .role {
+    font-size: 13px;
+    color: #666;
+    font-weight: normal;
+}
