@@ -37,6 +37,7 @@ class Auth extends Controller
           }
 
           if ($validPassword) {
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $user->id;
             $_SESSION['role'] = $user->role;
             $_SESSION['user_email'] = $user->email;

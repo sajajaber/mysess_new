@@ -11,11 +11,11 @@ class Nurse extends User
 
     $result = $this->query(
       "SELECT COUNT(*) as count
-             FROM medications m
-             JOIN students s ON m.student_id = s.id
-             JOIN nurse_student ns ON s.id = ns.student_id
-             WHERE ns.nurse_id = :nurse_id
-               AND m.is_active = 1",
+      FROM medications m
+      JOIN students s ON m.student_id = s.id
+      JOIN nurse_student ns ON s.id = ns.student_id
+      WHERE ns.nurse_id = :nurse_id
+          AND m.is_active = 1",
       ['nurse_id' => $nurse_id]
     );
 

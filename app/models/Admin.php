@@ -258,4 +258,9 @@ class Admin extends User
   {
     return ['admin', 'teacher', 'therapist', 'nurse', 'parent', 'boarding_staff', 'security_guard'];
   }
+
+  public function getUserById($id)
+  {
+    return $this->first(['id' => $id]);
+  }
 }
