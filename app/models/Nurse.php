@@ -43,14 +43,14 @@ class Nurse extends User
   }
 
   // Get assigned students count
-  public function getStudentCountByNurseId($nurse_id = null)
+  public function getStudentCountByNurseId($nurse_id)
   {
     $students = $this->getAssignedStudents($nurse_id);
     return is_array($students) ? count($students) : 0;
   }
 
   // Get students with allergies count
-  public function getStudentWithAllergiesCountByNurseId($nurse_id = null)
+  public function getStudentWithAllergiesCountByNurseId($nurse_id)
   {
     if (!$nurse_id) {
       return 0;
@@ -73,7 +73,7 @@ class Nurse extends User
   }
 
   // Get students with active medications count
-  public function getStudentWithActiveMedicationsCountByNurseId($nurse_id = null)
+  public function getStudentWithActiveMedicationsCountByNurseId($nurse_id)
   {
     if (!$nurse_id) {
       return 0;
@@ -96,7 +96,7 @@ class Nurse extends User
   }
 
   // Check if a student is assigned to this nurse
-  public function isStudentAssigned($student_id, $nurse_id = null)
+  public function isStudentAssigned($student_id, $nurse_id)
   {
     if (!$nurse_id) {
       return false;

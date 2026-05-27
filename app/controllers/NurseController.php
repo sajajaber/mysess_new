@@ -72,12 +72,6 @@ class NurseController extends Controller
         ]);
     }
 
-    // /nurse/medications  — alias used in menu.php
-    public function medications()
-    {
-        $this->all_medications();
-    }
-
     // /nurse/all_medications
     public function all_medications()
     {
