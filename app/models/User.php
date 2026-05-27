@@ -57,4 +57,11 @@ class User extends Model
   {
     return [];
   }
+
+  public function getById($id)
+  {
+    return $this->first(['id' => $id]);
+  }
+
+  
 }

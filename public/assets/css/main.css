@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+a {
+    text-decoration: none; 
+}
+
 body {
     font-family: Arial, Helvetica, sans-serif;
     background: #f4f7fa;
@@ -21,45 +25,6 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 25px;
     margin-bottom: 30px;
-}
-
-.total-students-card,
-.allegies-card,
-.on-medication-card {
-    background: white;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: #e2e8f0 0px 4px 6px;
-    transition: transform 0.3s, box-shadow 0.3s;
-    position: relative;
-    overflow: hidden;
-}
-
-.total-students-card:hover,
-.allegies-card:hover,
-.on-medication-card:hover {
-    transform: translateY(-3px);
-}
-
-.stat-value {
-    font-size: 48px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.stat-sub {
-    font-size: 14px;
-    color: #999;
-}
-
-.total-students-card .stat-value,
-.on-medication-card .stat-value
-{
-    color: #c00040;
-}
-
-.allegies-card .stat-value {
-    color: #da356c;
 }
 
 .card {

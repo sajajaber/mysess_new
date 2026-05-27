@@ -1,11 +1,16 @@
     </main>
-    <footer class="app-footer">
-      <p>© <?= date('Y') ?> <?= esc(APP_NAME) ?>. All rights reserved.</p>
-    </footer>
   </div>
   <script>
     function closeModal(modalId) {
-      document.getElementById(modalId)?.classList.remove('open');
+      const modal = document.getElementById(modalId);
+        if (modal)
+          modal.classList.remove('open');
+    }
+    
+    function openModal(modalId) {
+      const modal = document.getElementById(modalId);
+        if (modal) 
+          modal.classList.add('open');
     }
   </script>
 </body>

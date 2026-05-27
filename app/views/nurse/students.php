@@ -1,23 +1,24 @@
 <?php
-if (!defined('ROOT')) {
-    define('ROOT', '');
-}
+// LOAD CONFIG FIRST - BEFORE ANYTHING ELSE
+require_once __DIR__ . '/../../core/config.php';
 
-$pageTitle = 'My Students';
+$pageTitle   = 'My Students';
 $pageHeading = 'My Students';
-$activePage = 'students';
+$activePage  = 'students';
+
 $topbarActions = '
-    <a href="' . ROOT . '/nurse/dashboard" class="btn">Dashboard</a>
-    <a href="' . ROOT . '/nurse/all_medications" class="btn btn-primary">Medications</a>
+<a href="' . ROOT . '/nurse/dashboard"><button class="btn btn-primary">Dashboard</button></a>
+<a href="' . ROOT . '/nurse/all_medications"><button class="btn btn-primary">Medications</button></a>
 ';
 
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
+
 ?>
 
 <!-- Students Table -->
 <?php
-$data = $students ?? [];
+$data    = $students ?? [];
 $headers = ['Name', 'Date of Birth', 'Diagnosis', 'Actions'];
 $renderRow = function ($student) {
   ob_start();
@@ -26,11 +27,7 @@ $renderRow = function ($student) {
     <td>
       <div class="student-info">
         <div class="student-avatar-small">
-          <?php if ($student->photo_url): ?>
-            <img src="<?= ROOT . '/' . $student->photo_url ?>" alt="">
-          <?php else: ?>
-            <span><?= strtoupper(substr($student->first_name, 0, 1) . substr($student->last_name, 0, 1)) ?></span>
-          <?php endif; ?>
+          <!-- if we want to put a student photo, the code should be here, but we will forget about it for now -->
         </div>
         <a href="<?= ROOT ?>/nurse/student/<?= $student->id ?>" class="student-name">
           <?= esc($student->first_name . ' ' . $student->last_name) ?>

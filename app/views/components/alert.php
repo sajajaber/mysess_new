@@ -1,26 +1,31 @@
-<?php
-$alertMessage = null;
-$alertType = 'info';
+<?php if (!empty($_SESSION['success'])): ?>
+    <div class="alert alert-success alert-dismissible">
+        <?= $_SESSION['success']; ?>
+        <button class="close-btn" onclick="this.parentElement.remove()">&times;</button>
+    </div>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
 
-if (!empty($errors) && is_array($errors)) {
-    $alertMessage = implode(' ', array_map('esc', $errors));
-    $alertType = 'danger';
-} elseif (!empty($_SESSION['login_error'])) {
-    $alertMessage = $_SESSION['login_error'];
-    $alertType = 'danger';
-    unset($_SESSION['login_error']);
-} elseif (!empty($_SESSION['medication_success'])) {
-    $alertMessage = $_SESSION['medication_success'];
-    $alertType = 'success';
-    unset($_SESSION['medication_success']);
-} elseif (!empty($_SESSION['medication_error'])) {
-    $alertMessage = $_SESSION['medication_error'];
-    $alertType = 'danger';
-    unset($_SESSION['medication_error']);
-}
+<?php if (!empty($_SESSION['error'])): ?>
+    <div class="alert alert-error alert-dismissible">
+        <?= $_SESSION['error']; ?>
+        <button class="close-btn" onclick="this.parentElement.remove()">&times;</button>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
 
-if ($alertMessage): ?>
-<div class="alert alert-<?= esc($alertType) ?>">
-  <?= $alertMessage ?>
-</div>
+<?php if (!empty($_SESSION['medication_success'])): ?>
+    <div class="alert alert-success alert-dismissible">
+        <?= $_SESSION['medication_success']; ?>
+        <button class="close-btn" onclick="this.parentElement.remove()">&times;</button>
+    </div>
+    <?php unset($_SESSION['medication_success']); ?>
+<?php endif; ?>
+
+<?php if (!empty($_SESSION['medication_error'])): ?>
+    <div class="alert alert-error alert-dismissible">
+        <?= $_SESSION['medication_error']; ?>
+        <button class="close-btn" onclick="this.parentElement.remove()">&times;</button>
+    </div>
+    <?php unset($_SESSION['medication_error']); ?>
 <?php endif; ?>

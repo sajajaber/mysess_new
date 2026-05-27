@@ -1,26 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= esc($pageTitle ?? APP_NAME) ?></title>
-  <link rel="stylesheet" href="<?= ROOT ?>/assets/css/main.css">
-  <link rel="stylesheet" href="<?= ROOT ?>/assets/css/topbar.css">
-  <link rel="stylesheet" href="<?= ROOT ?>/assets/css/sidebar.css">
-</head>
-<body>
-  <div class="app-shell">
-    <?php require __DIR__ . '/../components/sidebar.php'; ?>
-    <header class="app-header">
-      <div class="brand">
-        <a href="<?= ROOT ?>"><?= esc(APP_NAME) ?></a>
-      </div>
-      <div class="header-center">
-        <h1><?= esc($pageHeading ?? $pageTitle ?? APP_NAME) ?></h1>
-      </div>
-      <div class="header-actions">
-        <?= $topbarActions ?? '' ?>
-      </div>
-    </header>
+  <title><?= $pageTitle ?? 'MySESS - Nurse Dashboard' ?></title>
 
-    <main class="app-content">
+  <link rel="stylesheet" href="/../mysess_new/public/assets/css/main.css">
+  <link rel="stylesheet" href="/../mysess_new/public/assets/css/sidebar.css">
+  <link rel="stylesheet" href="/../mysess_new/public/assets/css/topbar.css">
+  <link rel="stylesheet" href="/../mysess_new/public/assets/css/display-student.css">
+</head>
+
+<body>
+
+  <!-- Sidebar Component -->
+  <?php require_once __DIR__ . '/../components/sidebar.php'; ?>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1><?= $pageHeading ?? 'Dashboard' ?></h1>
+        <p id="current-date">
+          <!-- Reference: https://www.w3schools.com/Js/js_dates.asp -->
+          <script>
+            const date = new Date();
+            const options = {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            };
+            document.write(date.toLocaleDateString("en-GB", options));
+          </script>
+        </p>
+      </div>
+      <?php if (isset($topbarActions)): ?>
+        <div class="topbar-right">
+          <?= $topbarActions ?>
+        </div>
+      <?php endif; ?>
+    </div>

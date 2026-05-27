@@ -1,46 +1,56 @@
 <?php
 class App
 {
-  public $controller = 'Nurse';
-  public $method = 'index';
+  public $controller = 'Auth';
+  public $method     = 'login';
 
   private function splitURL()
   {
     $URL = $_GET['url'] ?? '';
     $URL = trim($URL, '/');
+    $URL = filter_var($URL, FILTER_SANITIZE_URL);
     $URL = explode('/', $URL);
-
     return $URL;
   }
 
   public function loadController()
   {
     $URL = $this->splitURL();
-    $controllerName = isset($URL[0]) && $URL[0] !== '' ? preg_replace('/[^a-zA-Z0-9_]/', '', $URL[0]) : '';
-    $this->controller = $controllerName !== '' ? ucfirst($controllerName) : 'Nurse';
 
-    $filename = __DIR__ . "/../controllers/" . $this->controller . ".php";
+    $controllerName = isset($URL[0]) && $URL[0] !== ''
+      ? preg_replace('/[^a-zA-Z0-9_]/', '', $URL[0])
+      : 'Auth';
 
-    if (file_exists($filename)) {
-      require $filename;
+    $baseName = ucfirst($controllerName);
+
+    if (file_exists(__DIR__ . "/../controllers/" . $baseName . "Controller.php")) {
+      $this->controller = $baseName . "Controller";
+    } elseif (file_exists(__DIR__ . "/../controllers/" . $baseName . ".php")) {
+      $this->controller = $baseName;
     } else {
-      $filename = __DIR__ . "/../controllers/_404.php";
-      require $filename;
-      $this->controller = "_404";
+      require __DIR__ . "/../controllers/_404.php";
+      $controller = new _404;
+      $controller->index();
+      return;
     }
 
+    require __DIR__ . "/../controllers/" . $this->controller . ".php";
     $controller = new $this->controller;
-    $methodName = isset($URL[1]) ? preg_replace('/[^a-zA-Z0-9_]/', '', $URL[1]) : '';
 
-    if ($methodName !== '' && method_exists($controller, $methodName)) {
+    $methodName = isset($URL[1]) && $URL[1] !== ''
+      ? $URL[1]
+      : ($baseName === 'Auth' ? 'login' : ($baseName === 'Nurse' ? 'dashboard' : 'index'));
+
+    // Convert hyphens to underscores so health-records → health_records
+    $methodName = str_replace('-', '_', $methodName);
+    // Strip anything that isn't a valid PHP identifier character
+    $methodName = preg_replace('/[^a-zA-Z0-9_]/', '', $methodName);
+
+    if (method_exists($controller, $methodName)) {
       $this->method = $methodName;
       $params = array_slice($URL, 2);
-    } elseif ($methodName === '') {
-      $this->method = 'index';
-      $params = [];
     } else {
-      $filename = __DIR__ . "/../controllers/_404.php";
-      require $filename;
+      require __DIR__ . "/../controllers/_404.php";
       $controller = new _404;
       $this->method = 'index';
       $params = [];

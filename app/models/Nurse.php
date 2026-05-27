@@ -3,7 +3,27 @@ class Nurse extends User
 {
   protected $table = 'users';
 
+  public function getTotalMedicationsByNurseId($nurse_id = null)
+  {
+    if (!$nurse_id) {
+      return 0;
+    }
 
+    $result = $this->query(
+      "SELECT COUNT(*) as count
+             FROM medications m
+             JOIN students s ON m.student_id = s.id
+             JOIN nurse_student ns ON s.id = ns.student_id
+             WHERE ns.nurse_id = :nurse_id
+               AND m.is_active = 1",
+      ['nurse_id' => $nurse_id]
+    );
+
+    if ($result && isset($result[0]->count)) {
+      return (int)$result[0]->count;
+    }
+    return 0;
+  }
   // Override: Get students assigned to this nurse
   public function getAssignedStudents($nurse_id = null)
   {
@@ -23,14 +43,14 @@ class Nurse extends User
   }
 
   // Get assigned students count
-  public function getStudentCount($nurse_id = null)
+  public function getStudentCountByNurseId($nurse_id = null)
   {
     $students = $this->getAssignedStudents($nurse_id);
     return is_array($students) ? count($students) : 0;
   }
 
   // Get students with allergies count
-  public function getStudentsWithAllergiesCount($nurse_id = null)
+  public function getStudentWithAllergiesCountByNurseId($nurse_id = null)
   {
     if (!$nurse_id) {
       return 0;
@@ -53,7 +73,7 @@ class Nurse extends User
   }
 
   // Get students with active medications count
-  public function getStudentsWithMedicationsCount($nurse_id = null)
+  public function getStudentWithActiveMedicationsCountByNurseId($nurse_id = null)
   {
     if (!$nurse_id) {
       return 0;
@@ -94,5 +114,27 @@ class Nurse extends User
     );
 
     return $result && isset($result[0]->count) && $result[0]->count > 0;
+  }
+
+  public function getRecentHealthRecordsByNurseId($nurse_id = null, $limit = 5)
+  {
+    if (!$nurse_id) {
+      return [];
+    }
+
+    return $this->query(
+      "SELECT hr.*, s.first_name as student_first_name, s.last_name as student_last_name, u.first_name as recorded_by_first_name, u.last_name as recorded_by_last_name
+             FROM health_records hr
+             JOIN students s ON hr.student_id = s.id
+             JOIN users u ON hr.recorded_by = u.id
+             JOIN nurse_student ns ON s.id = ns.student_id
+             WHERE ns.nurse_id = :nurse_id
+             ORDER BY hr.recorded_at DESC
+             LIMIT :limit",
+      [
+        'nurse_id' => $nurse_id,
+        'limit' => (int)$limit
+      ]
+    );
   }
 }
