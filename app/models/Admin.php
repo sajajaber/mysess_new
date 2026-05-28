@@ -263,4 +263,20 @@ class Admin extends User
   {
     return $this->first(['id' => $id]);
   }
+
+  public function getRecentUsers($limit = 5)
+{
+    return $this->query(
+        "SELECT * FROM users ORDER BY id DESC LIMIT :limit",
+        ['limit' => $limit]
+    );
+}
+
+public function getRecentStudents($limit = 5)
+{
+    return $this->query(
+        "SELECT * FROM students ORDER BY id DESC LIMIT :limit",
+        ['limit' => $limit]
+    );
+}
 }

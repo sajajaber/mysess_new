@@ -18,7 +18,7 @@ require_once __DIR__ . '/../components/alert.php';
 
 <!-- Students Table -->
 <?php
-$data    = $students ?? [];
+$data = $students ?? [];
 $headers = ['Name', 'Date of Birth', 'Diagnosis', 'Actions'];
 $renderRow = function ($student) {
   ob_start();

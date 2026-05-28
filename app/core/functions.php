@@ -4,7 +4,7 @@ function esc($str)
     return htmlspecialchars($str, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
 
-function statCard($number, $title)
+function statCard($number, $title, $color)
 {
 ?>
     <style>
@@ -26,7 +26,7 @@ function statCard($number, $title)
             font-size: 48px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #eb004e;
+            color: <?php $color ?>;
         }
 
         .stat-sub {

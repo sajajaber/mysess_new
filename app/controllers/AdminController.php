@@ -14,11 +14,15 @@ class AdminController extends Controller
 
   public function dashboard()
   {
-    $stats = $this->adminModel->getDashboardStats();
-    $this->view(
-      'admin/dashboard',
-      ['stats' => $stats,]
-    );
+    $stats          = $this->adminModel->getDashboardStats();
+    $recentUsers    = $this->adminModel->getRecentUsers(5);
+    $recentStudents = $this->adminModel->getRecentStudents(5);
+
+    $this->view('admin/dashboard', [
+      'stats'          => $stats,
+      'recentUsers'    => $recentUsers    ?: [],
+      'recentStudents' => $recentStudents ?: [],
+    ]);
   }
 
   public function users()
@@ -135,11 +139,12 @@ class AdminController extends Controller
 
   public function students()
   {
-    $students = $this->adminModel->getAllStudents();
+    $showArchived = isset($_GET['archived']);
+    $students     = $this->adminModel->getAllStudents(!$showArchived);
 
-    $this->view('admin/students',
-                ['students' => $students ?: [],]
-    );
+    $this->view('admin/students', [
+      'students' => $students ?: [],
+    ]);
   }
 
   public function add_student()
