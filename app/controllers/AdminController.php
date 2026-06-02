@@ -2,6 +2,10 @@
 class AdminController extends Controller
 {
   private $adminModel;
+  private $medicationModel;
+  private $medLogModel;
+  private $healthEventModel;
+  private $healthRecordModel;
 
   public function __construct()
   {
@@ -9,7 +13,11 @@ class AdminController extends Controller
       header('Location: ' . ROOT . '/auth/login');
       exit();
     }
-    $this->adminModel = new Admin();
+    $this->adminModel        = new Admin();
+    $this->medicationModel   = new Medication();
+    $this->medLogModel       = new MedicationLog();
+    $this->healthEventModel  = new HealthEvent();
+    $this->healthRecordModel = new HealthRecord();
   }
 
   public function dashboard()
@@ -39,9 +47,30 @@ class AdminController extends Controller
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-      // Check email isn't already taken
-      if ($this->adminModel->emailExists($_POST['email'])) {
-        $_SESSION['error'] = 'Email already exists.';
+      $errors = [];
+
+      if (empty($_POST['first_name']))
+        $errors[] = 'First name is required.';
+
+      if (empty($_POST['last_name']))
+        $errors[] = 'Last name is required.';
+
+      if (empty($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL))
+        $errors[] = 'A valid email is required.';
+      elseif ($this->adminModel->emailExists($_POST['email']))
+        $errors[] = 'Email is already taken.';
+
+      if (empty($_POST['role']) || !in_array($_POST['role'], $this->adminModel->getRoles()))
+        $errors[] = 'Please select a valid role.';
+
+      if (empty($_POST['password']) || strlen($_POST['password']) < 6)
+        $errors[] = 'Password must be at least 6 characters.';
+      elseif ($_POST['password'] !== $_POST['password_confirm'])
+        $errors[] = 'Passwords do not match.';
+
+      if (!empty($errors)) {
+        $_SESSION['errors'] = $errors;
+        $_SESSION['old']    = $_POST;
         header('Location: ' . ROOT . '/admin/add_user');
         exit();
       }
@@ -76,8 +105,32 @@ class AdminController extends Controller
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-      if ($this->adminModel->emailExists($_POST['email'], $id)) {
-        $_SESSION['error'] = 'Email already taken by another user.';
+      $errors = [];
+
+      if (empty($_POST['first_name']))
+        $errors[] = 'First name is required.';
+
+      if (empty($_POST['last_name']))
+        $errors[] = 'Last name is required.';
+
+      if (empty($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL))
+        $errors[] = 'A valid email is required.';
+      elseif ($this->adminModel->emailExists($_POST['email'], $id))
+        $errors[] = 'Email is already taken by another user.';
+
+      if (empty($_POST['role']) || !in_array($_POST['role'], $this->adminModel->getRoles()))
+        $errors[] = 'Please select a valid role.';
+
+      if (!empty($_POST['password'])) {
+        if (strlen($_POST['password']) < 6)
+          $errors[] = 'New password must be at least 6 characters.';
+        elseif ($_POST['password'] !== $_POST['password_confirm'])
+          $errors[] = 'Passwords do not match.';
+      }
+
+      if (!empty($errors)) {
+        $_SESSION['errors'] = $errors;
+        $_SESSION['old']    = $_POST;
         header('Location: ' . ROOT . '/admin/edit_user/' . $id);
         exit();
       }
@@ -95,7 +148,7 @@ class AdminController extends Controller
       }
 
       $_SESSION['success'] = 'User updated successfully.';
-      header('Location: ' . ROOT . '/admin/users');
+      header('Location: ' . ROOT . '/admin/view_user/' . $id);
       exit();
     }
 
@@ -269,6 +322,56 @@ class AdminController extends Controller
       'therapists'  => $therapists,
       'students'    => $students,
       'assignments' => $assignments,
+    ]);
+  }
+
+  public function view_user($id = null)
+  {
+    if (!$id) {
+      header('Location: ' . ROOT . '/admin/users');
+      exit();
+    }
+
+    $user = $this->adminModel->getUserById($id);
+
+    if (!$user) {
+      header('Location: ' . ROOT . '/admin/users');
+      exit();
+    }
+
+    $assignedStudents = $this->adminModel->getAssignedStudentsForUser($id, $user->role);
+
+    $this->view('admin/view-user', [
+      'user'             => $user,
+      'assignedStudents' => $assignedStudents ?: [],
+    ]);
+  }
+
+  public function view_student($student_id = null)
+  {
+    if (!$student_id) {
+      header('Location: ' . ROOT . '/admin/students');
+      exit();
+    }
+
+    $student = $this->adminModel->getStudentById($student_id);
+
+    if (!$student) {
+      header('Location: ' . ROOT . '/admin/students');
+      exit();
+    }
+
+    $this->view('admin/view-student', [
+      'student'        => $student,
+      'medications'    => $this->medicationModel->where(['student_id' => $student_id, 'is_active' => 1])   ?: [],
+      'medLogs'        => $this->medLogModel->getLogsForStudent($student_id)                                ?: [],
+      'healthEvents'   => $this->healthEventModel->where(['student_id' => $student_id])                    ?: [],
+      'healthRecords'  => $this->healthRecordModel->where(['student_id' => $student_id])                   ?: [],
+      'iepGoals'       => $this->adminModel->getIepGoalsForStudent($student_id)                            ?: [],
+      'goalProgress'   => $this->adminModel->getGoalProgressForStudent($student_id)                        ?: [],
+      'sessions'       => $this->adminModel->getSessionsForStudent($student_id)                            ?: [],
+      'teacchProgress' => $this->adminModel->getTeacchProgressForStudent($student_id)                      ?: [],
+      'assignedStaff'  => $this->adminModel->getAssignedStaffForStudent($student_id)                       ?: [],
     ]);
   }
 }

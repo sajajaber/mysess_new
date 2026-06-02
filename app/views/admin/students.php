@@ -21,10 +21,10 @@ require 'C:/xampp1/htdocs/mysess_new/public/assets/css/admin.php';
 <!-- Toggle -->
 <div class='table-filters'>
     <?php if ($showArchived): ?>
-        <a href='<?= ROOT ?>/admin/students' class='btn btn-primary'>Show Active Only</a>
-        <span class='filter-badge'>Showing archived students</span>
+        <a href='<?= ROOT ?>/admin/students''><span class='show-archived'>Show Active Only</span></a>
+        <span class='filter-badge'>showing archived students</span>
     <?php else: ?>
-        <a href='<?= ROOT ?>/admin/students?archived=1' class='btn btn-primary'>Show Archived</a>
+        <a href='<?= ROOT ?>/admin/students?archived=1'><span class='show-archived'>Show Archived</span></a>
     <?php endif;
     ?>
 </div>
@@ -38,7 +38,7 @@ $renderRow = function ($student) {
     <tr>
         <td>
             <div class='student-info'>
-                <a href="<?= ROOT ?>/admin/edit_student/<?= $student->id ?>" class='student-name'>
+                <a href="<?= ROOT ?>/admin/view_student/<?= $student->id ?>" class='student-name'>
                     <?= esc( $student->first_name . ' ' . $student->last_name ) ?>
                 </a>
             </div>

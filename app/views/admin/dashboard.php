@@ -16,12 +16,12 @@ $topbarActions = '
 $stats          = $stats          ?? null;
 $recentUsers    = $recentUsers    ?? [];
 $recentStudents = $recentStudents ?? [];
- 
+
 $totalStaff = (int)($stats->total_teachers    ?? 0)
-            + (int)($stats->total_therapists   ?? 0)
-            + (int)($stats->total_nurses       ?? 0)
-            + (int)($stats->total_boarding_staff ?? 0)
-            + (int)($stats->total_security     ?? 0);
+    + (int)($stats->total_therapists   ?? 0)
+    + (int)($stats->total_nurses       ?? 0)
+    + (int)($stats->total_boarding_staff ?? 0)
+    + (int)($stats->total_security     ?? 0);
 
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
@@ -63,10 +63,10 @@ require 'C:/xampp1/htdocs/mysess_new/public/assets/css/admin.php';
         </div>
     </div>
 </div>
- 
+
 <!-- Recent Tables -->
 <div class="dashboard-grid">
- 
+
     <!-- Recent Students -->
     <div class="card">
         <div class="card-header">
@@ -85,7 +85,9 @@ require 'C:/xampp1/htdocs/mysess_new/public/assets/css/admin.php';
                 </thead>
                 <tbody>
                     <?php if (empty($recentStudents)): ?>
-                        <tr><td colspan="4">No students found.</td></tr>
+                        <tr>
+                            <td colspan="4">No students found.</td>
+                        </tr>
                     <?php else: ?>
                         <?php foreach ($recentStudents as $student): ?>
                             <tr>
@@ -104,7 +106,7 @@ require 'C:/xampp1/htdocs/mysess_new/public/assets/css/admin.php';
             </table>
         </div>
     </div>
- 
+
 </div>
- 
+
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

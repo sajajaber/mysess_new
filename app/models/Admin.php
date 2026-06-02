@@ -265,18 +265,124 @@ class Admin extends User
   }
 
   public function getRecentUsers($limit = 5)
-{
+  {
     return $this->query(
-        "SELECT * FROM users ORDER BY id DESC LIMIT :limit",
-        ['limit' => $limit]
+      "SELECT * FROM users ORDER BY id DESC LIMIT :limit",
+      ['limit' => $limit]
     );
-}
+  }
 
-public function getRecentStudents($limit = 5)
-{
+  public function getRecentStudents($limit = 5)
+  {
     return $this->query(
-        "SELECT * FROM students ORDER BY id DESC LIMIT :limit",
-        ['limit' => $limit]
+      "SELECT * FROM students ORDER BY id DESC LIMIT :limit",
+      ['limit' => $limit]
     );
-}
+  }
+
+  // Get assigned students for any staff member (nurse, teacher, therapist)
+  public function getAssignedStudentsForUser($user_id, $role)
+  {
+    if ($role === 'nurse') {
+      return $this->query(
+        "SELECT s.id, s.first_name, s.last_name, s.diagnosis
+          FROM students s
+          JOIN nurse_student ns ON s.id = ns.student_id
+          WHERE ns.nurse_id = :user_id AND s.is_active = 1
+          ORDER BY s.last_name ASC",
+        ['user_id' => $user_id]
+      );
+    }
+    if (in_array($role, ['teacher', 'therapist'])) {
+      return $this->query(
+        "SELECT s.id, s.first_name, s.last_name, s.diagnosis
+          FROM students s
+          JOIN student_assignments sa ON s.id = sa.student_id
+          WHERE sa.user_id = :user_id AND sa.role_type = :role AND sa.end_date IS NULL AND s.is_active = 1
+          ORDER BY s.last_name ASC",
+        ['user_id' => $user_id, 'role' => $role]
+      );
+    }
+    if ($role === 'parent') {
+      return $this->query(
+        "SELECT s.id, s.first_name, s.last_name, s.diagnosis
+          FROM students s
+          WHERE s.guardian_id = :user_id AND s.is_active = 1
+          ORDER BY s.last_name ASC",
+        ['user_id' => $user_id]
+      );
+    }
+    return [];
+  }
+
+  // Get IEP goals for a student
+  public function getIepGoalsForStudent($student_id)
+  {
+    return $this->query(
+      "SELECT ig.*, u.first_name as created_by_first, u.last_name as created_by_last
+        FROM iep_goals ig
+        LEFT JOIN users u ON ig.created_by = u.id
+        WHERE ig.student_id = :student_id
+        ORDER BY ig.created_at DESC",
+      ['student_id' => $student_id]
+    );
+  }
+
+  // Get goal progress for a student
+  public function getGoalProgressForStudent($student_id)
+  {
+    return $this->query(
+      "SELECT gp.*, ig.goal_text, ig.category, u.first_name as recorded_by_first, u.last_name as recorded_by_last
+        FROM goal_progress gp
+        JOIN iep_goals ig ON gp.goal_id = ig.id
+        LEFT JOIN users u ON gp.recorded_by = u.id
+        WHERE ig.student_id = :student_id
+        ORDER BY gp.recorded_at DESC",
+      ['student_id' => $student_id]
+    );
+  }
+
+  // Get sessions a student attended
+  public function getSessionsForStudent($student_id)
+  {
+    return $this->query(
+      "SELECT s.*, u.first_name as created_by_first, u.last_name as created_by_last
+        FROM sessions s
+        JOIN session_students ss ON s.id = ss.session_id
+        LEFT JOIN users u ON s.created_by = u.id
+        WHERE ss.student_id = :student_id
+        ORDER BY s.scheduled_at DESC",
+      ['student_id' => $student_id]
+    );
+  }
+
+  public function getTeacchProgressForStudent($student_id)
+  {
+    return $this->query(
+      "SELECT tp.*, tt.title as task_title,
+                u.first_name as recorded_by_first, u.last_name as recorded_by_last
+         FROM teacch_progress tp
+         JOIN teacch_tasks tt ON tp.task_id = tt.id
+         LEFT JOIN users u ON tp.recorded_by = u.id
+         WHERE tp.student_id = :student_id
+         ORDER BY tp.session_date DESC, tp.created_at DESC",
+      ['student_id' => $student_id]
+    );
+  }
+
+  public function getAssignedStaffForStudent($student_id)
+  {
+    return $this->query(
+      "SELECT u.id, u.first_name, u.last_name, u.role, u.email, sa.start_date, sa.role_type
+        FROM users u
+        JOIN student_assignments sa ON u.id = sa.user_id
+        WHERE sa.student_id = :student_id AND sa.end_date IS NULL
+        UNION
+          SELECT u.id, u.first_name, u.last_name, u.role, u.email, NULL as start_date, 'nurse' as role_type FROM users u
+        JOIN nurse_student ns ON u.id = ns.nurse_id
+        WHERE ns.student_id = :student_id
+        ORDER BY role_type ASC",
+      ['student_id' => $student_id]
+    );
+  }
 }

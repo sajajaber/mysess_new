@@ -26,7 +26,7 @@ function statCard($number, $title, $color)
             font-size: 48px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: <?php $color ?>;
+            color: <?= $color ?>;
         }
 
         .stat-sub {
