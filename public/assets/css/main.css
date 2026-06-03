@@ -32,8 +32,8 @@ body {
     border-radius: 15px;
     box-shadow: #e2e8f0 0px 4px 6px;
     overflow: hidden;
-    /*the card should have the same width as the dashboard */
-    width: 960px; 
+    width: 100%;
+    max-width: 100%;
 }
 
 .card-header {
@@ -72,7 +72,9 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 500px;
 }
+
 
 thead {
     background: #f7fafc;

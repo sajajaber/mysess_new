@@ -19,9 +19,9 @@ require_once __DIR__ . '/../components/alert.php';
 
 <div class="stat-cards">
   <?php
-    statCard($totalStudents ?? 0, 'Total Students');
-    statCard($medicationCount ?? 0, 'Total Medications');
-    statCard($studentsOnMeds ?? 0, 'Students on Medications');
+    statCard($totalStudents ?? 0, 'Total Students', '#e1496a');
+    statCard($medicationCount ?? 0, 'Total Medications', '#e1496a');
+    statCard($studentsOnMeds ?? 0, 'Students on Medications', '#e1496a');
   ?>
 </div>
 

@@ -89,7 +89,7 @@
   align-items: center;
 }
 
-/* ── Buttons ─────────────────────────────────────────────────── */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -100,9 +100,7 @@
   font-weight: 600;
   cursor: pointer;
   border: none;
-  transition:
-    transform 0.15s,
-    box-shadow 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
   text-decoration: none;
 }
 
@@ -131,7 +129,6 @@
   font-size: 12px;
 }
 
-/* ── Section Tabs ─────────────────────────────────────────────── */
 .section-tabs {
   display: flex;
   gap: 4px;
@@ -169,7 +166,7 @@
   box-shadow: 0 2px 8px rgba(255, 122, 151, 0.35);
 }
 
-/* ── Section Panels ──────────────────────────────────────────── */
+
 .section-panel {
   display: none;
 }
@@ -190,7 +187,7 @@
   }
 }
 
-/* ── Severity Badges ─────────────────────────────────────────── */
+
 .severity-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -216,7 +213,7 @@
   border: 1px solid #9ae6b4;
 }
 
-/* ── Record Type Badges ──────────────────────────────────────── */
+
 .record-type-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -254,12 +251,11 @@
   color: #4a5568;
 }
 
-/* ── Inline form (for deactivate button) ─────────────────────── */
 .inline-form {
   display: inline;
 }
 
-/* ── Action icon buttons ──────────────────────────────────────── */
+
 .btn-icon {
   background: none;
   border: none;
