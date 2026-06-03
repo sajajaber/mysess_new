@@ -19,18 +19,24 @@
 
 hr {
   border-color: #e2e8f0;
-  margin-top: 35px;
-  margin-bottom: 35px;
+  margin-top: 16px;
+  margin-bottom: 16px;
 }
 
 .sidebar-logo {
   color: #e1496a;
-  padding-top: 40px;
-  padding-bottom: 20px;
+  padding-top: 24px;
+  padding-bottom: 16px;
   text-align: center;
   font-size: 32px;
   font-weight: bold;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* The menu scrolls on its own if there are lots of links, so the bottom stays visible */
+.sidebar-menu {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .sidebar a {
@@ -53,10 +59,9 @@ hr {
 }
 
 .sidebar-bottom {
-  margin-top: auto;
-  padding: 20px;
+  padding: 16px 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 90px;
+  flex-shrink: 0;
 }
 
 

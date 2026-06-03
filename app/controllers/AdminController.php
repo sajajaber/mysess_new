@@ -2,6 +2,8 @@
 class AdminController extends Controller
 {
   private $adminModel;
+  private $goalBankModel;
+  private $taskBankModel;
 
   public function __construct()
   {
@@ -10,6 +12,8 @@ class AdminController extends Controller
       exit();
     }
     $this->adminModel = new Admin();
+    $this->goalBankModel = new IepGoalBank();
+    $this->taskBankModel = new TeacchTaskBank();
   }
 
   public function dashboard()
@@ -270,5 +274,217 @@ class AdminController extends Controller
       'students'    => $students,
       'assignments' => $assignments,
     ]);
+  }
+
+  // The fixed set of categories a goal (bank entry or student goal) may use
+  private function goalCategories()
+  {
+    return [
+      'Communication' => 'Communication',
+      'Social'        => 'Social',
+      'Motor'         => 'Motor',
+      'Academic'      => 'Academic',
+      'Behavioral'    => 'Behavioral',
+      'Daily Living'  => 'Daily Living',
+    ];
+  }
+
+  // /admin/goal-bank — list every bank entry
+  public function goal_bank()
+  {
+    $entries = $this->goalBankModel->getAll();
+
+    $this->view('admin/goal-bank', [
+      'entries' => $entries ?: [],
+    ]);
+  }
+
+  // /admin/add-goal-bank
+  public function add_goal_bank()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $category = $_POST['category'] ?? '';
+      $goalText = trim($_POST['goal_text'] ?? '');
+
+      // Category must be one of our fixed values
+      if (!array_key_exists($category, $this->goalCategories())) {
+        $_SESSION['error'] = 'Please choose a valid category.';
+        header('Location: ' . ROOT . '/admin/add-goal-bank');
+        exit();
+      }
+      if ($goalText === '') {
+        $_SESSION['error'] = 'Goal text is required.';
+        header('Location: ' . ROOT . '/admin/add-goal-bank');
+        exit();
+      }
+
+      $this->goalBankModel->addEntry($category, esc($goalText), $_SESSION['user_id']);
+
+      $_SESSION['success'] = 'Goal bank entry added.';
+      header('Location: ' . ROOT . '/admin/goal-bank');
+      exit();
+    }
+
+    $this->view('admin/add-goal-bank', [
+      'categories' => $this->goalCategories(),
+    ]);
+  }
+
+  // /admin/edit-goal-bank/{id}
+  public function edit_goal_bank($id)
+  {
+    $entry = $this->goalBankModel->first(['id' => (int)$id]);
+
+    if (!$entry) {
+      header('Location: ' . ROOT . '/admin/goal-bank');
+      exit();
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $category = $_POST['category'] ?? '';
+      $goalText = trim($_POST['goal_text'] ?? '');
+
+      if (!array_key_exists($category, $this->goalCategories())) {
+        $_SESSION['error'] = 'Please choose a valid category.';
+        header('Location: ' . ROOT . '/admin/edit-goal-bank/' . (int)$id);
+        exit();
+      }
+      if ($goalText === '') {
+        $_SESSION['error'] = 'Goal text is required.';
+        header('Location: ' . ROOT . '/admin/edit-goal-bank/' . (int)$id);
+        exit();
+      }
+
+      $this->goalBankModel->updateEntry((int)$id, $category, esc($goalText));
+
+      $_SESSION['success'] = 'Goal bank entry updated.';
+      header('Location: ' . ROOT . '/admin/goal-bank');
+      exit();
+    }
+
+    $this->view('admin/edit-goal-bank', [
+      'entry'      => $entry,
+      'categories' => $this->goalCategories(),
+    ]);
+  }
+
+  // /admin/toggle-goal-bank — turn an entry on or off
+  public function toggle_goal_bank()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $id       = (int)$_POST['id'];
+      $isActive = (int)$_POST['is_active'];
+      $this->goalBankModel->setActive($id, $isActive);
+      $_SESSION['success'] = 'Goal bank entry updated.';
+    }
+
+    header('Location: ' . ROOT . '/admin/goal-bank');
+    exit();
+  }
+
+  // The fixed set of categories a TEACCH task (bank entry) may use
+  private function teacchCategories()
+  {
+    return [
+      'Self-Care'         => 'Self-Care',
+      'Daily Living'      => 'Daily Living',
+      'Classroom Routine' => 'Classroom Routine',
+      'Play/Leisure'      => 'Play/Leisure',
+      'Vocational'        => 'Vocational',
+      'Communication'     => 'Communication',
+    ];
+  }
+
+  // /admin/teacch-tasks — list every TEACCH task bank entry
+  public function teacch_tasks()
+  {
+    $entries = $this->taskBankModel->getAll();
+
+    $this->view('admin/teacch-tasks', [
+      'entries' => $entries ?: [],
+    ]);
+  }
+
+  // /admin/add-teacch-task
+  public function add_teacch_task()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $category = $_POST['category'] ?? '';
+      $title    = trim($_POST['title'] ?? '');
+
+      // Category must be one of our fixed values
+      if (!array_key_exists($category, $this->teacchCategories())) {
+        $_SESSION['error'] = 'Please choose a valid category.';
+        header('Location: ' . ROOT . '/admin/add-teacch-task');
+        exit();
+      }
+      if ($title === '') {
+        $_SESSION['error'] = 'Task title is required.';
+        header('Location: ' . ROOT . '/admin/add-teacch-task');
+        exit();
+      }
+
+      $this->taskBankModel->addEntry($category, esc($title), $_SESSION['user_id']);
+
+      $_SESSION['success'] = 'TEACCH task added.';
+      header('Location: ' . ROOT . '/admin/teacch-tasks');
+      exit();
+    }
+
+    $this->view('admin/add-teacch-task', [
+      'categories' => $this->teacchCategories(),
+    ]);
+  }
+
+  // /admin/edit-teacch-task/{id}
+  public function edit_teacch_task($id)
+  {
+    $entry = $this->taskBankModel->first(['id' => (int)$id]);
+
+    if (!$entry) {
+      header('Location: ' . ROOT . '/admin/teacch-tasks');
+      exit();
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $category = $_POST['category'] ?? '';
+      $title    = trim($_POST['title'] ?? '');
+
+      if (!array_key_exists($category, $this->teacchCategories())) {
+        $_SESSION['error'] = 'Please choose a valid category.';
+        header('Location: ' . ROOT . '/admin/edit-teacch-task/' . (int)$id);
+        exit();
+      }
+      if ($title === '') {
+        $_SESSION['error'] = 'Task title is required.';
+        header('Location: ' . ROOT . '/admin/edit-teacch-task/' . (int)$id);
+        exit();
+      }
+
+      $this->taskBankModel->updateEntry((int)$id, $category, esc($title));
+
+      $_SESSION['success'] = 'TEACCH task updated.';
+      header('Location: ' . ROOT . '/admin/teacch-tasks');
+      exit();
+    }
+
+    $this->view('admin/edit-teacch-task', [
+      'entry'      => $entry,
+      'categories' => $this->teacchCategories(),
+    ]);
+  }
+
+  // /admin/toggle-teacch-task — turn an entry on or off
+  public function toggle_teacch_task()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $id       = (int)$_POST['id'];
+      $isActive = (int)$_POST['is_active'];
+      $this->taskBankModel->setActive($id, $isActive);
+      $_SESSION['success'] = 'TEACCH task updated.';
+    }
+
+    header('Location: ' . ROOT . '/admin/teacch-tasks');
+    exit();
   }
 }

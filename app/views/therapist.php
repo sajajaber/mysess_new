@@ -1,1 +1,0 @@
-<h1>this is the therapist view</h1>

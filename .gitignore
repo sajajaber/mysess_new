@@ -1,0 +1,6 @@
+# Kiro assistant and spec files (kept local only, never pushed)
+.kiro/
+
+# Source report document (kept local only)
+Reportv3 FINAL (1).docx.pdf
+*.docx.pdf

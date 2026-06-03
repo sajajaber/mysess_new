@@ -14,6 +14,8 @@ $sidebarItems = [
     'dashboard' => '/admin/dashboard',
     'users' => '/admin/users',
     'students' => '/admin/students',
+    'goal bank' => '/admin/goal-bank',
+    'teacch tasks' => '/admin/teacch-tasks',
     'sessions' => '/admin/sessions',
     'reports' => '/admin/reports',
     'messages' => '/admin/messages'
@@ -27,15 +29,23 @@ $sidebarItems = [
   'teacher' => [
     'dashboard' => '/teacher/dashboard',
     'students' => '/teacher/students',
+    'iep goals' => '/teacher/iep-goals',
+    'teacch' => '/teacher/teacch',
+    'homework' => '/teacher/homework',
     'sessions' => '/teacher/sessions',
     'progress reports' => '/teacher/progress-reports',
+    'semester report' => '/teacher/semester-report',
+    'profile' => '/teacher/profile',
     'messages' => '/teacher/messages'
   ],
   'therapist' => [
     'dashboard' => '/therapist/dashboard',
     'students' => '/therapist/students',
     'iep goals' => '/therapist/iep-goals',
+    'teacch' => '/therapist/teacch',
     'sessions' => '/therapist/sessions',
+    'semester report' => '/therapist/semester-report',
+    'profile' => '/therapist/profile',
     'messages' => '/therapist/messages'
   ],
   'boarding-staff' => [
@@ -52,6 +62,14 @@ $currentMenu = isset($sidebarItems[$role]) ? $sidebarItems[$role] : [];
 // Get user info from session
 $user_name = $_SESSION['user_name'];
 $userRole = ucfirst($role ?? '');
+
+// Look up this user's profile picture (or fall back to their initials)
+$currentUser = (new User())->getById($_SESSION['user_id'] ?? 0);
+$sidebarPhotoFile = $currentUser->photo_url ?? '';
+$sidebarPhotoPath = $sidebarPhotoFile ? ROOT . '/public/assets/uploads/' . $sidebarPhotoFile : '';
+$sidebarInitials  = $currentUser
+  ? strtoupper(substr($currentUser->first_name, 0, 1) . substr($currentUser->last_name, 0, 1))
+  : '';
 ?>
 
 <aside class='sidebar'>
@@ -79,6 +97,13 @@ $userRole = ucfirst($role ?? '');
 
   <div class='sidebar-bottom'>
     <div class='user-info'>
+      <div class='sidebar-avatar'>
+        <?php if ($sidebarPhotoPath): ?>
+          <img src="<?= $sidebarPhotoPath ?>" alt="Profile picture" class="sidebar-avatar-img">
+        <?php else: ?>
+          <div class="sidebar-avatar-initials"><?= htmlspecialchars($sidebarInitials) ?></div>
+        <?php endif; ?>
+      </div>
       <div class='name'>
         <?= htmlspecialchars($user_name ?: '') ?>
       </div>
@@ -93,6 +118,39 @@ $userRole = ucfirst($role ?? '');
 </aside>
 
 <style>
+  /* Profile picture in the sidebar, centered above the name and role */
+  .sidebar-avatar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  /* Center the name and role under the picture */
+  .sidebar-bottom .user-info {
+    text-align: center;
+  }
+
+  .sidebar-avatar-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+  }
+
+  .sidebar-avatar-initials {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #4f46e5;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
   .logout-btn {
     all: unset;
     border: none;
