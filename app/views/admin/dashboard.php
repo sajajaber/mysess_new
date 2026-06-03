@@ -26,7 +26,7 @@ $totalStaff = (int)($stats->total_teachers    ?? 0)
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
 
-require 'C:/xampp1/htdocs/mysess_new/public/assets/css/admin.php';
+require __DIR__ . '/../../../public/assets/css/admin.php';
 ?>
 
 <!-- Stat Cards -->

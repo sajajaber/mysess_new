@@ -25,7 +25,7 @@ require_once __DIR__ . '/../components/alert.php';
     <?php unset($_SESSION['errors']); ?>
 <?php endif; ?>
 <?php
-require 'C:/xampp1/htdocs/mysess_new/public/assets/css/admin.php';
+require __DIR__ . '/../../../public/assets/css/admin.php';
 
 $roles = $roles ?? [];
 $old   = $_SESSION['old'] ?? [];

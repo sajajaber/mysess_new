@@ -15,7 +15,7 @@ require_once __DIR__ . '/../components/alert.php';
 $students     = $students ?? [];
 $showArchived = isset($_GET['archived']);
 
-require 'C:/xampp1/htdocs/mysess_new/public/assets/css/admin.php';
+require __DIR__ . '/../../../public/assets/css/admin.php';
 ?>
 
 <!-- Toggle -->
