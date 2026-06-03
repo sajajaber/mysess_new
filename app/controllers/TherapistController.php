@@ -16,7 +16,6 @@ class TherapistController extends Controller
 
   public function __construct()
   {
-    // Only logged-in therapists are allowed past this point
     if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'therapist') {
       header('Location: ' . ROOT . '/auth/login');
       exit();
@@ -35,15 +34,11 @@ class TherapistController extends Controller
     $this->teacchProgressModel = new TeacchProgress();
     $this->taskBankModel       = new TeacchTaskBank();
   }
-
-  // /therapist  -> send to the dashboard
   public function index()
   {
     header('Location: ' . ROOT . '/therapist/dashboard');
     exit();
   }
-
-  // /therapist/dashboard
   public function dashboard()
   {
     $therapistId = $_SESSION['user_id'];
@@ -61,8 +56,6 @@ class TherapistController extends Controller
       'recentSessions' => $recentSessions ?: [],
     ]);
   }
-
-  // /therapist/students
   public function students()
   {
     $therapistId = $_SESSION['user_id'];
@@ -72,8 +65,6 @@ class TherapistController extends Controller
       'students' => $students ?: [],
     ]);
   }
-
-  // /therapist/student/{id} — full therapy profile
   public function student($studentId = null)
   {
     $studentId = (int)$studentId;
@@ -95,8 +86,6 @@ class TherapistController extends Controller
       'schedules'   => $schedules   ?: [],
     ]);
   }
-
-  // /therapist/sessions
   public function sessions()
   {
     $therapistId = $_SESSION['user_id'];
@@ -106,9 +95,6 @@ class TherapistController extends Controller
       'sessions' => $sessions ?: [],
     ]);
   }
-
-  // The semesters a therapist can report on (machine key => friendly label)
-  // Key is "startDate|endDate" so the report can split it without storing anything
   private function semesterOptions()
   {
     $options = [];
@@ -121,8 +107,6 @@ class TherapistController extends Controller
 
     return $options;
   }
-
-  // /therapist/semester-report — pick a student + semester, then auto-build the report
   public function semester_report()
   {
     $therapistId = $_SESSION['user_id'];
@@ -130,8 +114,6 @@ class TherapistController extends Controller
 
     $studentId = (int)($_GET['student_id'] ?? 0);
     $semester  = $_GET['semester'] ?? '';
-
-    // No choices yet, so just show the picker form
     if (!$studentId || $semester === '') {
       $this->view('therapist/semester-report-form', [
         'students'  => $this->therapistModel->getMyStudents($therapistId) ?: [],
@@ -139,15 +121,11 @@ class TherapistController extends Controller
       ]);
       return;
     }
-
-    // The student must be one of mine
     $student = $this->findStudentIfItIsMine($studentId);
     if (!$student) {
       header('Location: ' . ROOT . '/therapist/students');
       exit();
     }
-
-    // The semester must be one we offered
     if (!isset($semesters[$semester])) {
       $_SESSION['error'] = 'Please choose a valid semester.';
       header('Location: ' . ROOT . '/therapist/semester-report');
@@ -155,8 +133,6 @@ class TherapistController extends Controller
     }
 
     list($startDate, $endDate) = explode('|', $semester);
-
-    // Build one tidy block of data per goal: baseline, current, change, status, milestones
     $goals  = $this->iepGoalModel->getGoalsForReport($studentId) ?: [];
     $report = [];
 
@@ -200,8 +176,6 @@ class TherapistController extends Controller
       'therapistName' => $_SESSION['user_name'] ?? '',
     ]);
   }
-
-  // Turn a goal status + latest score into a simple "Met / In Progress / Not Met" label
   private function goalStatusLabel($status, $currentScore)
   {
     if ($status === 'achieved') {
@@ -218,12 +192,8 @@ class TherapistController extends Controller
     }
     return 'Not Met';
   }
-
-  // Build the TEACCH part of the report: each schedule with its tasks, the latest
-  // independence level per task inside the range, and a schedule percentage for the bar.
   private function compileTeacch($studentId, $startDate, $endDate)
   {
-    // Turn an independence level into a 0-100 number we can average and chart
     $levelToPercent = [
       'full_prompt'    => 33,
       'partial_prompt' => 66,
@@ -271,8 +241,6 @@ class TherapistController extends Controller
 
     return $blocks;
   }
-
-  // /therapist/schedule-session
   public function schedule_session()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -293,8 +261,6 @@ class TherapistController extends Controller
         header('Location: ' . ROOT . '/therapist/schedule-session?student_id=' . $studentId);
         exit();
       }
-
-      // A new session starts as "scheduled" with no notes and no goal yet
       $this->sessionModel->insert([
         'student_id'   => $studentId,
         'therapist_id' => $_SESSION['user_id'],
@@ -318,15 +284,11 @@ class TherapistController extends Controller
 
     $this->view('therapist/schedule-session', ['student' => $student]);
   }
-
-  // /therapist/document-session
   public function document_session()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $sessionId = (int)$_POST['session_id'];
       $session   = $this->sessionModel->first(['id' => $sessionId]);
-
-      // The session must exist and belong to one of this therapist's students
       if (!$session || !$this->findStudentIfItIsMine((int)$session->student_id)) {
         header('Location: ' . ROOT . '/therapist/students');
         exit();
@@ -337,13 +299,9 @@ class TherapistController extends Controller
         header('Location: ' . ROOT . '/therapist/document-session?session_id=' . $sessionId);
         exit();
       }
-
-      // The goal addressed is optional, so it may be empty (NULL)
       $goalAddressedId = !empty($_POST['goal_addressed_id'])
         ? (int)$_POST['goal_addressed_id']
         : null;
-
-      // Fill in the same session row and mark it completed
       $this->sessionModel->update($sessionId, [
         'performance_notes' => esc($_POST['performance_notes']),
         'status'            => 'completed',
@@ -362,8 +320,6 @@ class TherapistController extends Controller
       header('Location: ' . ROOT . '/therapist/students');
       exit();
     }
-
-    // Load this student's goals so the therapist can pick which one was addressed
     $iepGoals = $this->iepGoalModel->getGoalsForStudent((int)$session->student_id);
 
     $this->view('therapist/document-session', [
@@ -371,8 +327,6 @@ class TherapistController extends Controller
       'iepGoals' => $iepGoals ?: [],
     ]);
   }
-
-  // /therapist/add-iep-goal  (saves into the existing iep_goals table)
   public function add_iep_goal()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -415,8 +369,6 @@ class TherapistController extends Controller
       header('Location: ' . ROOT . '/therapist/students');
       exit();
     }
-
-    // Active bank entries for the optional "choose from bank" picker
     $bankEntries = $this->goalBankModel->getActive();
 
     $this->view('therapist/add-iep-goal', [
@@ -424,8 +376,6 @@ class TherapistController extends Controller
       'bankEntries' => $bankEntries ?: [],
     ]);
   }
-
-  // /therapist/goal/{id} — goal detail page (milestones + progress + charts)
   public function goal($goalId = null)
   {
     $goal = $this->findGoalIfItIsMine($goalId);
@@ -447,8 +397,6 @@ class TherapistController extends Controller
       'latestScore'   => $latestScore,
     ]);
   }
-
-  // /therapist/add-milestone
   public function add_milestone()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -476,8 +424,6 @@ class TherapistController extends Controller
     header('Location: ' . ROOT . '/therapist/students');
     exit();
   }
-
-  // /therapist/toggle-milestone
   public function toggle_milestone()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -499,8 +445,6 @@ class TherapistController extends Controller
     header('Location: ' . ROOT . '/therapist/students');
     exit();
   }
-
-  // /therapist/record-progress — save a numeric score (0-100) for a goal
   public function record_progress()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -511,8 +455,6 @@ class TherapistController extends Controller
         header('Location: ' . ROOT . '/therapist/students');
         exit();
       }
-
-      // The score must be a number from 0 to 100
       $score = $_POST['score'] ?? '';
       if ($score === '' || !is_numeric($score) || $score < 0 || $score > 100) {
         $_SESSION['error'] = 'Score must be a number from 0 to 100.';
@@ -535,8 +477,6 @@ class TherapistController extends Controller
     header('Location: ' . ROOT . '/therapist/students');
     exit();
   }
-
-  // /therapist/iep-goals — every IEP goal across all my students
   public function iep_goals()
   {
     $therapistId = $_SESSION['user_id'];
@@ -546,8 +486,6 @@ class TherapistController extends Controller
       'goals' => $goals ?: [],
     ]);
   }
-
-  // /therapist/profile — view and edit my own details + profile picture
   public function profile()
   {
     $userId    = $_SESSION['user_id'];
@@ -558,15 +496,11 @@ class TherapistController extends Controller
       $lastName  = trim($_POST['last_name'] ?? '');
       $email     = trim($_POST['email'] ?? '');
       $phone     = trim($_POST['phone'] ?? '');
-
-      // Name and email are required
       if ($firstName === '' || $lastName === '' || $email === '') {
         $_SESSION['error'] = 'First name, last name, and email are required.';
         header('Location: ' . ROOT . '/therapist/profile');
         exit();
       }
-
-      // Make sure the email is not already used by someone else
       if ($userModel->emailTakenByOther($email, $userId)) {
         $_SESSION['error'] = 'That email is already used by another account.';
         header('Location: ' . ROOT . '/therapist/profile');
@@ -574,16 +508,12 @@ class TherapistController extends Controller
       }
 
       $userModel->updateProfile($userId, esc($firstName), esc($lastName), esc($email), esc($phone));
-
-      // If a picture was uploaded, save it
       $photoError = $this->saveProfilePhoto($userId);
       if ($photoError) {
         $_SESSION['error'] = $photoError;
         header('Location: ' . ROOT . '/therapist/profile');
         exit();
       }
-
-      // Keep the name shown in the sidebar fresh
       $_SESSION['user_name'] = trim($firstName . ' ' . $lastName);
 
       $_SESSION['success'] = 'Profile updated.';
@@ -594,22 +524,14 @@ class TherapistController extends Controller
     $user = $userModel->getById($userId);
     $this->view('therapist/profile', ['user' => $user]);
   }
-
-  // Saves an uploaded profile picture, if one was chosen.
-  // Returns an error message string on failure, or null when all is fine.
   private function saveProfilePhoto($userId)
   {
-    // No file chosen is perfectly fine
     if (empty($_FILES['photo']['name'])) {
       return null;
     }
-
-    // Catch upload problems other than "no file"
     if ($_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
       return 'Something went wrong uploading the picture. Please try again.';
     }
-
-    // Only allow real image files
     $allowed = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif'];
     $info = getimagesize($_FILES['photo']['tmp_name']);
     if ($info === false) {
@@ -620,8 +542,6 @@ class TherapistController extends Controller
     if (!array_key_exists($extension, $allowed)) {
       return 'Please upload a JPG, PNG, or GIF image.';
     }
-
-    // Save it as profile_{userId}.{ext} so each user has one picture
     $fileName = 'profile_' . (int)$userId . '.' . $extension;
     $destination = ROOT_DIR . '/public/assets/uploads/' . $fileName;
 
@@ -634,8 +554,6 @@ class TherapistController extends Controller
 
     return null;
   }
-
-  // Returns the student only if they belong to the current therapist, else null
   private function findStudentIfItIsMine($studentId)
   {
     $therapistId = $_SESSION['user_id'];
@@ -650,8 +568,6 @@ class TherapistController extends Controller
 
     return $this->studentModel->first(['id' => $studentId]);
   }
-
-  // Returns the goal only if its student belongs to the current therapist, else null
   private function findGoalIfItIsMine($goalId)
   {
     $goalId = (int)$goalId;
@@ -663,16 +579,12 @@ class TherapistController extends Controller
     if (!$goal) {
       return null;
     }
-
-    // Reuse the student ownership check
     if (!$this->findStudentIfItIsMine((int)$goal->student_id)) {
       return null;
     }
 
     return $goal;
   }
-
-  // /therapist/teacch — every TEACCH schedule across all my students
   public function teacch()
   {
     $therapistId = $_SESSION['user_id'];
@@ -682,8 +594,6 @@ class TherapistController extends Controller
       'schedules' => $schedules ?: [],
     ]);
   }
-
-  // Returns the schedule only if its student belongs to the current therapist, else null
   private function findScheduleIfItIsMine($scheduleId)
   {
     $scheduleId = (int)$scheduleId;
@@ -695,17 +605,12 @@ class TherapistController extends Controller
     if (!$schedule) {
       return null;
     }
-
-    // Reuse the student ownership check
     if (!$this->findStudentIfItIsMine((int)$schedule->student_id)) {
       return null;
     }
 
     return $schedule;
   }
-
-  // Returns the task only if its schedule's student belongs to me, else null.
-  // The returned task gets a student_id added on, ready for the rating insert.
   private function findTaskIfItIsMine($taskId)
   {
     $taskId = (int)$taskId;
@@ -717,19 +622,13 @@ class TherapistController extends Controller
     if (!$task) {
       return null;
     }
-
-    // The task belongs to a schedule; make sure that schedule is mine
     $schedule = $this->findScheduleIfItIsMine((int)$task->schedule_id);
     if (!$schedule) {
       return null;
     }
-
-    // Hand back the task with its student id so we can save a rating for it
     $task->student_id = (int)$schedule->student_id;
     return $task;
   }
-
-  // /therapist/add-schedule — create a visual schedule for a student
   public function add_schedule()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -756,8 +655,6 @@ class TherapistController extends Controller
     header('Location: ' . ROOT . '/therapist/students');
     exit();
   }
-
-  // /therapist/schedule/{id} — the schedule detail page (tasks + ratings)
   public function schedule($scheduleId = null)
   {
     $schedule = $this->findScheduleIfItIsMine($scheduleId);
@@ -767,14 +664,10 @@ class TherapistController extends Controller
     }
 
     $tasks = $this->teacchTaskModel->getForSchedule((int)$schedule->id);
-
-    // For each task, attach its latest level and its rating history
     foreach ($tasks as $task) {
       $task->latest  = $this->teacchProgressModel->getLatestForTask((int)$task->id);
       $task->history = $this->teacchProgressModel->getForTask((int)$task->id);
     }
-
-    // Active bank tasks for the picker, and a sensible default order number
     $bankEntries = $this->taskBankModel->getActive();
     $nextOrder   = count($tasks) + 1;
 
@@ -785,8 +678,6 @@ class TherapistController extends Controller
       'nextOrder'   => $nextOrder,
     ]);
   }
-
-  // /therapist/add-task — add an ordered task to a schedule
   public function add_task()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -824,8 +715,6 @@ class TherapistController extends Controller
     header('Location: ' . ROOT . '/therapist/students');
     exit();
   }
-
-  // /therapist/rate-independence — record an independence rating for a task
   public function rate_independence()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -836,15 +725,11 @@ class TherapistController extends Controller
         header('Location: ' . ROOT . '/therapist/students');
         exit();
       }
-
-      // session date and level are both required
       if (trim($_POST['session_date'] ?? '') === '') {
         $_SESSION['error'] = 'Session date is required.';
         header('Location: ' . ROOT . '/therapist/schedule/' . (int)$task->schedule_id);
         exit();
       }
-
-      // The level must be one of our three allowed values
       $level  = $_POST['independence_level'] ?? '';
       $levels = ['full_prompt' => 1, 'partial_prompt' => 1, 'independent' => 1];
       if (!isset($levels[$level])) {

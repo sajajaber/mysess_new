@@ -4,9 +4,6 @@ class TherapySession extends Model
   protected $table        = 'therapy_sessions';
   protected $order_column = 'session_date';
   protected $order_type   = 'desc';
-
-  // All sessions for one student, newest first.
-  // LEFT JOIN iep_goals because goal_addressed_id may be empty
   public function getSessionsForStudent($studentId)
   {
     return $this->query(
@@ -66,8 +63,6 @@ class TherapySession extends Model
     }
     return 0;
   }
-
-  // Sessions for one student inside a date range, newest first (for the semester report)
   public function getSessionsForStudentInRange($studentId, $startDate, $endDate)
   {
     return $this->query(

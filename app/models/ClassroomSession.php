@@ -48,8 +48,6 @@ class ClassroomSession extends Model
     }
     return 0;
   }
-
-  // Sessions for one student inside a date range, newest first (for the semester report)
   public function getSessionsForStudentInRange($studentId, $startDate, $endDate)
   {
     return $this->query(

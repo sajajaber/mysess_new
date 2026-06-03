@@ -4,6 +4,6 @@ class _404 extends Controller
 {
   public function index()
   {
-    echo "Page not found :(";
+    echo "Page not found sadly :(";
   }
 }

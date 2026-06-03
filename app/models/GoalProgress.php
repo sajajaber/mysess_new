@@ -55,8 +55,6 @@ class GoalProgress extends Model
     }
     return null;
   }
-
-  // The first score recorded inside the date range (the baseline for the report)
   public function getBaselineScoreInRange($goalId, $startDate, $endDate)
   {
     $result = $this->query(
@@ -79,8 +77,6 @@ class GoalProgress extends Model
     }
     return null;
   }
-
-  // The last score recorded inside the date range (the current level for the report)
   public function getLatestScoreInRange($goalId, $startDate, $endDate)
   {
     $result = $this->query(
@@ -103,8 +99,6 @@ class GoalProgress extends Model
     }
     return null;
   }
-
-  // How many scores were recorded for this goal inside the date range
   public function countInRange($goalId, $startDate, $endDate)
   {
     $result = $this->query(

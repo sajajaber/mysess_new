@@ -9,8 +9,6 @@ $activePage  = 'profile';
 
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
-
-// Work out the picture to show: the uploaded one, or initials if none yet.
 $photoFile = $user->photo_url ?? '';
 $photoPath = $photoFile ? ROOT . '/public/assets/uploads/' . $photoFile : '';
 ?>

@@ -14,8 +14,6 @@ $studentName = trim($student->first_name . ' ' . $student->last_name);
 $pageTitle   = 'Semester Report';
 $pageHeading = 'Semester Report';
 $activePage  = 'sessions';
-
-// Print button + back link in the topbar (hidden when printing)
 $topbarActions = '
   <a href="' . ROOT . '/therapist/semester-report"><button class="btn">Build Another</button></a>
   <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
@@ -23,8 +21,6 @@ $topbarActions = '
 
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
-
-// Pick a colour for each status label
 function statusColor($status)
 {
   if ($status === 'Met') {
@@ -35,8 +31,6 @@ function statusColor($status)
   }
   return '#dc2626';
 }
-
-// Draws a circular progress gauge using a pure-CSS conic gradient (no library)
 function progressCircle($percent, $color, $size = 120)
 {
   $percent = max(0, min(100, (int)$percent));
@@ -53,8 +47,6 @@ function progressCircle($percent, $color, $size = 120)
   </div>
 <?php
 }
-
-// Count goals per status, and work out the overall average current score
 $metCount = 0;
 $inProgressCount = 0;
 $notMetCount = 0;

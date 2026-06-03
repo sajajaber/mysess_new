@@ -4,8 +4,6 @@ class Homework extends Model
   protected $table        = 'homework';
   protected $order_column = 'created_at';
   protected $order_type   = 'desc';
-
-  // All homework this teacher assigned, newest first, with the student's name
   public function getForTeacher($teacherId)
   {
     return $this->query(
@@ -18,8 +16,6 @@ class Homework extends Model
       ['teacher_id' => $teacherId]
     );
   }
-
-  // All homework for one student, ordered by due date
   public function getForStudent($studentId)
   {
     return $this->query(
@@ -30,8 +26,6 @@ class Homework extends Model
       ['student_id' => $studentId]
     );
   }
-
-  // Add one homework row for a single student; is_submitted keeps its column default
   public function addHomework($studentId, $assignedBy, $title, $description, $dueDate)
   {
     return $this->query(

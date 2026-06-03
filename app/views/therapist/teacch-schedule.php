@@ -13,9 +13,6 @@ $topbarActions = '
 
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
-
-// Shows the latest independence level as a small colored badge.
-// Pass null (a task with no ratings yet) to get a grey "Not rated yet" badge.
 function independenceBadge($level)
 {
   $map = [
@@ -38,8 +35,6 @@ function independenceBadge($level)
   </span>
 <?php
 }
-
-// The three independence levels, used by the rating dropdown
 $levelOptions = [
   'full_prompt'    => 'Full Prompt',
   'partial_prompt' => 'Partial Prompt',
@@ -165,14 +160,11 @@ $levelOptions = [
       </div>
 
       <script>
-        // All active bank tasks, with their category, handed over from PHP.
         var bankTasks = [
           <?php foreach (($bankEntries ?? []) as $entry): ?>
           { category: "<?= esc($entry->category) ?>", title: "<?= esc(addslashes($entry->title)) ?>" },
           <?php endforeach; ?>
         ];
-
-        // Rebuild the task picker so it only shows tasks for the chosen category.
         function fillTaskPicker() {
           var chosenCategory = document.getElementById('bank_category').value;
           var picker = document.getElementById('bank_pick');

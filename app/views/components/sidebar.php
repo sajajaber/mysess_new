@@ -48,11 +48,10 @@ $sidebarItems = [
     'profile' => '/therapist/profile',
     'messages' => '/therapist/messages'
   ],
-  'boarding-staff' => [
-    'dashboard' => '/boarding-staff/dashboard',
-    'students' => '/boarding-staff/students',
-    'daily logs' => '/boarding-staff/daily-logs',
-    'activities' => '/boarding-staff/activities'
+  'boarding_staff' => [
+    'dashboard' => '/boarding/dashboard',
+    'students' => '/boarding/students',
+    'daily logs' => '/boarding/daily-logs'
   ]
 ];
 

@@ -1,6 +1,25 @@
-# Kiro assistant and spec files (kept local only, never pushed)
-.kiro/
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
 
-# Source report document (kept local only)
-Reportv3 FINAL (1).docx.pdf
-*.docx.pdf
+# Editor files
+.vscode/
+.idea/
+*.swp
+
+# PHP / dependencies
+vendor/
+composer.lock
+
+# Logs and temp
+*.log
+*.tmp
+
+# Local environment
+.env
+.env.local
+
+# Local uploads (kept on the server, not in source control)
+public/assets/uploads/*
+!public/assets/uploads/.gitkeep

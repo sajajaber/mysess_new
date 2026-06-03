@@ -4,8 +4,6 @@ class IepMilestone extends Model
   protected $table        = 'iep_milestones';
   protected $order_column = 'created_at';
   protected $order_type   = 'asc';
-
-  //All milestones for one goal
   public function getForGoal($goalId)
   {
     return $this->query(
@@ -16,8 +14,6 @@ class IepMilestone extends Model
       ['goal_id' => $goalId]
     );
   }
-
-  //Add a new milestone, saved as not yet achieved
   public function addMilestone($goalId, $description)
   {
     return $this->query(
@@ -29,8 +25,6 @@ class IepMilestone extends Model
       ]
     );
   }
-
-  //Mark a milestone achieved (stamps the time) or not achieved (just clears the flag)
   public function setAchieved($id, $isAchieved)
   {
     if ($isAchieved) {

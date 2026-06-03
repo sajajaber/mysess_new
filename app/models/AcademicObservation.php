@@ -14,8 +14,6 @@ class AcademicObservation extends Model
       ['student_id' => $studentId]
     );
   }
-
-  // Observations for one student inside a date range, newest first (for the semester report)
   public function getObservationsForStudentInRange($studentId, $startDate, $endDate)
   {
     return $this->query(

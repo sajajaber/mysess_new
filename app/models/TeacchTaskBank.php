@@ -4,8 +4,6 @@ class TeacchTaskBank extends Model
   protected $table        = 'teacch_task_bank';
   protected $order_column = 'created_at';
   protected $order_type   = 'desc';
-
-  // Every bank entry, newest first (for the admin list)
   public function getAll()
   {
     return $this->query(
@@ -14,8 +12,6 @@ class TeacchTaskBank extends Model
         ORDER BY created_at DESC"
     );
   }
-
-  // Only active entries, for the staff "choose from bank" picker
   public function getActive()
   {
     return $this->query(
@@ -25,8 +21,6 @@ class TeacchTaskBank extends Model
         ORDER BY category ASC, created_at DESC"
     );
   }
-
-  // Add a new active bank entry
   public function addEntry($category, $title, $createdBy)
   {
     return $this->query(
@@ -39,8 +33,6 @@ class TeacchTaskBank extends Model
       ]
     );
   }
-
-  // Edit an existing bank entry's category and title
   public function updateEntry($id, $category, $title)
   {
     return $this->query(
@@ -54,8 +46,6 @@ class TeacchTaskBank extends Model
       ]
     );
   }
-
-  // Turn an entry on (1) or off (0)
   public function setActive($id, $isActive)
   {
     return $this->query(

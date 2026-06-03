@@ -4,8 +4,6 @@ class TeacchProgress extends Model
   protected $table        = 'teacch_progress';
   protected $order_column = 'session_date';
   protected $order_type   = 'desc';
-
-  // Full rating history for one task, newest first
   public function getForTask($taskId)
   {
     return $this->query(
@@ -16,8 +14,6 @@ class TeacchProgress extends Model
       ['task_id' => $taskId]
     );
   }
-
-  // The most recent rating for a task, or null if it has none yet
   public function getLatestForTask($taskId)
   {
     $result = $this->query(
@@ -34,8 +30,6 @@ class TeacchProgress extends Model
     }
     return null;
   }
-
-  // The most recent rating for a task inside a date range (for the semester report)
   public function getLatestForTaskInRange($taskId, $startDate, $endDate)
   {
     $result = $this->query(
@@ -58,8 +52,6 @@ class TeacchProgress extends Model
     }
     return null;
   }
-
-  // How many ratings a task got inside a date range
   public function countForTaskInRange($taskId, $startDate, $endDate)
   {
     $result = $this->query(
@@ -80,8 +72,6 @@ class TeacchProgress extends Model
     }
     return 0;
   }
-
-  // Save one independence rating (the database fills created_at automatically)
   public function addRating($taskId, $studentId, $sessionDate, $independenceLevel, $notes, $recordedBy)
   {
     return $this->query(

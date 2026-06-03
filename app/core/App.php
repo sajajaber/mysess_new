@@ -41,9 +41,9 @@ class App
       ? $URL[1]
       : ($baseName === 'Auth' ? 'login' : ($baseName === 'Nurse' ? 'dashboard' : 'index'));
 
-    // Convert hyphens to underscores so health-records → health_records
+    //convert - to underscores
     $methodName = str_replace('-', '_', $methodName);
-    // Strip anything that isn't a valid PHP identifier character
+    //strip anything that isn't a PHP identifier character
     $methodName = preg_replace('/[^a-zA-Z0-9_]/', '', $methodName);
 
     if (method_exists($controller, $methodName)) {

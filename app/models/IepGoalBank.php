@@ -13,8 +13,6 @@ class IepGoalBank extends Model
         ORDER BY created_at DESC"
     );
   }
-
-  //for the staff choose from bank
   public function getActive()
   {
     return $this->query(

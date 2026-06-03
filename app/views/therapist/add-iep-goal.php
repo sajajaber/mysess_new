@@ -54,22 +54,15 @@ require_once __DIR__ . '/../components/alert.php';
       </div>
 
       <script>
-        // All active bank goals, with their category, handed over from PHP.
         var bankGoals = [
           <?php foreach (($bankEntries ?? []) as $entry): ?>
           { category: "<?= esc($entry->category) ?>", text: "<?= esc(addslashes($entry->goal_text)) ?>" },
           <?php endforeach; ?>
         ];
-
-        // Rebuild the bank picker so it only shows goals for the chosen category.
         function fillBankPicker() {
           var chosenCategory = document.getElementById('category').value;
           var picker = document.getElementById('bank_pick');
-
-          // Start fresh with just the placeholder option
           picker.innerHTML = '<option value="">— choose from goal bank (optional) —</option>';
-
-          // Add only the goals whose category matches
           for (var i = 0; i < bankGoals.length; i++) {
             if (bankGoals[i].category === chosenCategory) {
               var option = document.createElement('option');
@@ -79,8 +72,6 @@ require_once __DIR__ . '/../components/alert.php';
             }
           }
         }
-
-        // Fill it once when the page first loads
         fillBankPicker();
       </script>
 

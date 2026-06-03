@@ -13,8 +13,6 @@ $topbarActions = '
 
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
-
-// Count how many milestones are achieved, so we can show a fraction and a bar.
 $milestones   = $milestones ?? [];
 $totalCount   = count($milestones);
 $achievedCount = 0;
@@ -24,8 +22,6 @@ foreach ($milestones as $m) {
   }
 }
 $milestonePercent = $totalCount > 0 ? round($achievedCount / $totalCount * 100) : 0;
-
-// The latest score (or 0 if there is none yet) drives the score progress bar.
 $latestScore = isset($latestScore) && $latestScore !== null ? (int)$latestScore : 0;
 ?>
 

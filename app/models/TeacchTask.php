@@ -4,8 +4,6 @@ class TeacchTask extends Model
   protected $table        = 'teacch_tasks';
   protected $order_column = 'task_order';
   protected $order_type   = 'asc';
-
-  // All tasks for one schedule, in step order (lowest task_order first)
   public function getForSchedule($scheduleId)
   {
     return $this->query(
@@ -16,8 +14,6 @@ class TeacchTask extends Model
       ['schedule_id' => $scheduleId]
     );
   }
-
-  // One task by id, including schedule_id (needed for the ownership chain)
   public function getById($taskId)
   {
     $result = $this->query(
@@ -33,8 +29,6 @@ class TeacchTask extends Model
     }
     return false;
   }
-
-  // Add a task to a schedule (visual cue is optional)
   public function addTask($scheduleId, $taskOrder, $title, $visualCueUrl)
   {
     return $this->query(

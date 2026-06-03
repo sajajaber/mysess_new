@@ -15,8 +15,6 @@ class IepGoal extends Model
       ['student_id' => $studentId]
     );
   }
-  // table columns (goal_text, target_date, category, created_by) so the
-  // controllers don't have to worry about the exact column names.
   public function addGoal($studentId, $goalText, $targetDate, $category, $status, $createdBy)
   {
     return $this->query(
@@ -47,8 +45,6 @@ class IepGoal extends Model
     }
     return false;
   }
-
-  // All of a student's goals with the extra columns the semester report needs
   public function getGoalsForReport($studentId)
   {
     return $this->query(
@@ -59,9 +55,6 @@ class IepGoal extends Model
       ['student_id' => $studentId]
     );
   }
-
-  // Every goal across all students assigned to this staff member (teacher or therapist).
-  // Joins students for the name and student_assignments for ownership.
   public function getGoalsForStaff($userId, $roleType)
   {
     return $this->query(

@@ -4,8 +4,6 @@ class TeacchSchedule extends Model
   protected $table        = 'teacch_schedules';
   protected $order_column = 'created_at';
   protected $order_type   = 'desc';
-
-  // All schedules for one student, newest first
   public function getForStudent($studentId)
   {
     return $this->query(
@@ -16,9 +14,6 @@ class TeacchSchedule extends Model
       ['student_id' => $studentId]
     );
   }
-
-  // Every schedule across all students assigned to this staff member (teacher or therapist).
-  // Joins students for the name and student_assignments for ownership.
   public function getForStaff($userId, $roleType)
   {
     return $this->query(
@@ -38,8 +33,6 @@ class TeacchSchedule extends Model
       ]
     );
   }
-
-  // One schedule by id, including student_id (needed for the ownership check)
   public function getById($scheduleId)
   {
     $result = $this->query(
@@ -55,8 +48,6 @@ class TeacchSchedule extends Model
     }
     return false;
   }
-
-  // Add a new schedule (saved active)
   public function addSchedule($studentId, $title, $createdBy)
   {
     return $this->query(
