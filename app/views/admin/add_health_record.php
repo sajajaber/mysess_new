@@ -10,52 +10,27 @@ if (!$student) {
 
 $pageTitle    = 'Add Health Record';
 $pageHeading  = 'Add Health Record';
-$activePage   = 'health-records';
+$activePage   = 'students';
 $topbarActions = '
     <a href="' . ROOT . '/admin/view_student/' . $student->id . '"><button class="btn btn-primary">← Back to Profile</button></a>
 ';
 
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
-
-// Passed from NurseController::add_health_record()
-$students = $students ?? [];
-$record   = $record   ?? new stdClass();
-$isEdit   = isset($record->id);
 ?>
 
 <div class="card">
   <div class="card-header">
-    <h2><?= $isEdit ? 'Edit Health Record' : 'New Health Record' ?></h2>
+    <h2>New Health Record — <?= esc($student->first_name . ' ' . $student->last_name) ?></h2>
   </div>
-
   <div class="card-body">
-    <form method="POST" action="<?= ROOT ?>/nurse/add_health_record">
+    <form method="POST" action="<?= ROOT ?>/admin/add_health_record">
 
-      <?php if ($isEdit): ?>
-        <input type="hidden" name="id" value="<?= $record->id ?>">
-      <?php endif; ?>
-
-      <div class="form-group">
-        <label for="student_id">Student *</label>
-        <select id="student_id" name="student_id" required>
-          <option value="">Select Student</option>
-
-          <?php foreach ($students as $s): ?>
-            <option value="<?= $s->id ?>"
-              <?= (($record->student_id ?? null) == $s->id) ? 'selected' : '' ?>>
-              <?= esc($s->first_name . ' ' . $s->last_name) ?>
-            </option>
-          <?php endforeach; ?>
-
-        </select>
-      </div>
+      <input type="hidden" name="student_id" value="<?= $student->id ?>">
 
       <div class="form-group">
         <label for="record_type">Record Type *</label>
-
-        <?php
-        renderSelect(
+        <?php renderSelect(
           'record_type',
           [
             'checkup'     => 'Checkup',
@@ -63,40 +38,36 @@ $isEdit   = isset($record->id);
             'injury'      => 'Injury',
             'illness'     => 'Illness',
             'vaccination' => 'Vaccination',
-            'other'       => 'Other'
+            'other'       => 'Other',
           ],
-          $record->record_type ?? '',
+          '',
           ['id' => 'record_type', 'required' => true]
-        );
-        ?>
+        ); ?>
       </div>
 
       <div class="form-group">
         <label for="title">Title *</label>
-        <input type="text" id="title" name="title" required
-          value="<?= esc($record->title ?? '') ?>">
+        <input type="text" id="title" name="title" required>
       </div>
 
       <div class="form-group">
         <label for="description">Description</label>
-        <textarea id="description" name="description" rows="4"><?= esc($record->description ?? '') ?></textarea>
+        <textarea id="description" name="description" rows="4"></textarea>
       </div>
 
       <div class="form-group">
         <label for="recorded_at">Date *</label>
         <input type="date" id="recorded_at" name="recorded_at" required
-          value="<?= esc($record->recorded_at ?? date('Y-m-d')) ?>">
+          value="<?= date('Y-m-d') ?>">
       </div>
 
       <div class="form-group">
         <button type="submit" class="btn btn-primary">Save Record</button>
-        <a href="<?= ROOT ?>/nurse/health-records" class="btn">Cancel</a>
+        <a href="<?= ROOT ?>/admin/view_student/<?= $student->id ?>" class="btn">Cancel</a>
       </div>
 
     </form>
   </div>
 </div>
 
-<?php
-require_once __DIR__ . '/../layouts/footer.php';
-?>
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

@@ -8,6 +8,8 @@ class AdminController extends Controller
   private $medLogModel;
   private $healthEventModel;
   private $healthRecordModel;
+  private $classroomSessionModel;
+  private $therapySessionModel;
 
   public function __construct()
   {
@@ -18,10 +20,12 @@ class AdminController extends Controller
     $this->adminModel        = new Admin();
     $this->goalBankModel     = new IepGoalBank();
     $this->taskBankModel     = new TeacchTaskBank();
-    $this->medicationModel   = new Medication();
-    $this->medLogModel       = new MedicationLog();
-    $this->healthEventModel  = new HealthEvent();
-    $this->healthRecordModel = new HealthRecord();
+    $this->medicationModel     = new Medication();
+    $this->medLogModel         = new MedicationLog();
+    $this->healthEventModel    = new HealthEvent();
+    $this->healthRecordModel   = new HealthRecord();
+    $this->classroomSessionModel = new ClassroomSession();
+    $this->therapySessionModel   = new TherapySession();
   }
 
   public function dashboard()
@@ -192,6 +196,38 @@ class AdminController extends Controller
 
     header('Location: ' . ROOT . '/admin/users');
     exit();
+  }
+
+  public function sessions()
+  {
+    $classroomSessions = $this->classroomSessionModel->query(
+      "SELECT cs.*, s.first_name AS student_first_name, s.last_name AS student_last_name,
+              u.first_name AS teacher_first_name, u.last_name AS teacher_last_name
+         FROM classroom_sessions cs
+         JOIN students s ON cs.student_id = s.id
+         LEFT JOIN users u ON cs.teacher_id = u.id
+        ORDER BY cs.session_date DESC, cs.created_at DESC
+        LIMIT 100",
+      []
+    ) ?: [];
+
+    $therapySessions = $this->therapySessionModel->query(
+      "SELECT ts.*, s.first_name AS student_first_name, s.last_name AS student_last_name,
+              u.first_name AS therapist_first_name, u.last_name AS therapist_last_name,
+              ig.goal_text AS goal_addressed
+         FROM therapy_sessions ts
+         JOIN students s ON ts.student_id = s.id
+         LEFT JOIN users u ON ts.therapist_id = u.id
+         LEFT JOIN iep_goals ig ON ts.goal_addressed_id = ig.id
+        ORDER BY ts.session_date DESC, ts.created_at DESC
+        LIMIT 100",
+      []
+    ) ?: [];
+
+    $this->view('admin/sessions', [
+      'classroomSessions' => $classroomSessions,
+      'therapySessions'   => $therapySessions,
+    ]);
   }
 
   public function students()
@@ -589,5 +625,35 @@ class AdminController extends Controller
       'teacchProgress' => $this->adminModel->getTeacchProgressForStudent($student_id)                      ?: [],
       'assignedStaff'  => $this->adminModel->getAssignedStaffForStudent($student_id)                       ?: [],
     ]);
+  }
+
+  public function add_health_record()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $student_id = (int)$_POST['student_id'];
+
+      $this->healthRecordModel->insert([
+        'student_id'  => $student_id,
+        'record_type' => $_POST['record_type'],
+        'title'       => esc($_POST['title']),
+        'description' => esc($_POST['description'] ?? ''),
+        'recorded_by' => $_SESSION['user_id'],
+        'recorded_at' => $_POST['recorded_at'] ?? date('Y-m-d'),
+      ]);
+
+      $_SESSION['success'] = 'Health record added successfully.';
+      header('Location: ' . ROOT . '/admin/view_student/' . $student_id);
+      exit();
+    }
+
+    $student_id = (int)($_GET['student_id'] ?? 0);
+    $student    = $student_id ? $this->adminModel->getStudentById($student_id) : null;
+
+    if (!$student) {
+      header('Location: ' . ROOT . '/admin/students');
+      exit();
+    }
+
+    $this->view('admin/add_health_record', ['student' => $student]);
   }
 }

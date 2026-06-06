@@ -15,7 +15,7 @@ $topbarActions = '
     <a href="' . ROOT . '/admin/view_user/' . $user->id . '"><button class="btn btn-primary">← Back to Profile</button></a>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
 ?>
 <?php if (!empty($_SESSION['errors'])): ?>
@@ -25,7 +25,6 @@ require_once __DIR__ . '/../components/alert.php';
     <?php unset($_SESSION['errors']); ?>
 <?php endif; ?>
 <?php
-require __DIR__ . '/../../../public/assets/css/admin.php';
 
 $roles = $roles ?? [];
 $old   = $_SESSION['old'] ?? [];

@@ -9,13 +9,12 @@ $topbarActions = '
     <a href="' . ROOT . '/admin/add_student"><button class="btn btn-primary">Add Student</button></a>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
 
 $students     = $students ?? [];
 $showArchived = isset($_GET['archived']);
 
-require __DIR__ . '/../../../public/assets/css/admin.php';
 ?>
 
 <!-- Toggle -->

@@ -8,7 +8,7 @@ $sidebarItems = [
     'students' => '/nurse/students',
     'health-records' => '/nurse/health-records',
     'medications' => '/nurse/all_medications',
-    'messages' => '/nurse/messages'
+    'messages' => '/messages'
   ],
   'admin' => [
     'dashboard' => '/admin/dashboard',
@@ -18,13 +18,13 @@ $sidebarItems = [
     'teacch tasks' => '/admin/teacch-tasks',
     'sessions' => '/admin/sessions',
     'reports' => '/admin/reports',
-    'messages' => '/admin/messages'
+    'messages' => '/messages'
   ],
   'parent' => [
     'dashboard' => '/parent/dashboard',
     'academic' => '/parent/academic-records',
     'health' => '/parent/health-records',
-    'messages' => '/parent/messages'
+    'messages' => '/messages'
   ],
   'teacher' => [
     'dashboard' => '/teacher/dashboard',
@@ -36,7 +36,7 @@ $sidebarItems = [
     'progress reports' => '/teacher/progress-reports',
     'semester report' => '/teacher/semester-report',
     'profile' => '/teacher/profile',
-    'messages' => '/teacher/messages'
+    'messages' => '/messages'
   ],
   'therapist' => [
     'dashboard' => '/therapist/dashboard',
@@ -46,7 +46,7 @@ $sidebarItems = [
     'sessions' => '/therapist/sessions',
     'semester report' => '/therapist/semester-report',
     'profile' => '/therapist/profile',
-    'messages' => '/therapist/messages'
+    'messages' => '/messages'
   ],
   'boarding_staff' => [
     'dashboard' => '/boarding/dashboard',

@@ -9,8 +9,23 @@ $topbarActions = '
     <a href="' . ROOT . '/admin/goal-bank"><button class="btn btn-primary">Back to Goal Bank</button></a>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
+
+$categoryOptions = [];
+foreach ($categories ?? [] as $value => $label) {
+  $categoryOptions[$value] = [
+    'label' => $label,
+    'style' => [
+      'Communication' => 'background:#ecfeff;color:#0f766e;',
+      'Social'        => 'background:#f5f3ff;color:#6d28d9;',
+      'Motor'         => 'background:#fff7ed;color:#c2410c;',
+      'Academic'      => 'background:#eff6ff;color:#1d4ed8;',
+      'Behavioral'    => 'background:#fef2f2;color:#b91c1c;',
+      'Daily Living'  => 'background:#f0fdf4;color:#15803d;',
+    ][$value] ?? '',
+  ];
+}
 ?>
 
 <div class="card">
@@ -26,7 +41,7 @@ require_once __DIR__ . '/../components/alert.php';
         <?php
           renderSelect(
             'category',
-            $categories,
+            $categoryOptions,
             '',
             ['id' => 'category', 'required' => true]
           );

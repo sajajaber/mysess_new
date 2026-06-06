@@ -6,3 +6,4 @@ document.querySelectorAll('.section-tab').forEach(tab => {
     document.getElementById(tab.dataset.target).classList.add('active');
   });
 });
+

@@ -9,7 +9,7 @@ $topbarActions = '
     <a href="' . ROOT . '/admin/add-teacch-task"><button class="btn btn-primary">Add TEACCH Task</button></a>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
 
 ?>
@@ -23,7 +23,11 @@ $renderRow = function ($entry) {
     ob_start();
 ?>
     <tr>
-        <td><?= esc($entry->category) ?></td>
+        <td>
+            <span class="category-pill category-<?= strtolower(str_replace([' ', '/'], '-', $entry->category)) ?>">
+                <?= esc($entry->category) ?>
+            </span>
+        </td>
         <td><?= esc($entry->title) ?></td>
         <td>
             <span class="status-badge status-<?= $entry->is_active ? 'active' : 'inactive' ?>">
