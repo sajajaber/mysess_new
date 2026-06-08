@@ -88,8 +88,12 @@ function renderSelect($name, $options, $selected = null, $attributes = [])
     }
 ?>
     <select name="<?= htmlspecialchars($name) ?>" <?= $attrs ?>>
-        <?php foreach ($options as $value => $label): ?>
-            <option value="<?= htmlspecialchars($value) ?>" <?= ($selected == $value) ? 'selected' : '' ?>>
+        <?php foreach ($options as $value => $option): ?>
+            <?php
+            $label = is_array($option) ? ($option['label'] ?? (string)$value) : $option;
+            $style = is_array($option) && isset($option['style']) ? $option['style'] : '';
+            ?>
+            <option value="<?= htmlspecialchars($value) ?>" <?= ($selected == $value) ? 'selected' : '' ?> style="<?= esc($style) ?>">
                 <?= htmlspecialchars($label) ?>
             </option>
         <?php endforeach; ?>

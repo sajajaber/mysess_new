@@ -15,10 +15,8 @@ $topbarActions = '
     <a href="' . ROOT . '/admin/view_student/' . $student->id . '"><button class="btn btn-primary">← Back to Profile</button></a>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
-
-require __DIR__ . '/../../../public/assets/css/admin.php';
 
 $parents = $parents ?? [];
 $old     = $_SESSION['old'] ?? [];

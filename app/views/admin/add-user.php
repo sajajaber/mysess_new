@@ -9,10 +9,8 @@ $topbarActions = '
     <a href="' . ROOT . '/admin/users"><button class="btn btn-primary">← Back to Users</button></a>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
-
-require __DIR__ . '/../../../public/assets/css/admin.php';
 
 $roles = $roles ?? [];
 $old   = $_SESSION['old'] ?? [];

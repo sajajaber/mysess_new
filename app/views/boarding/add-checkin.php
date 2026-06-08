@@ -11,7 +11,7 @@ $topbarActions = '
   <a href="' . ROOT . '/boarding/student/' . (int)$student->id . '"><button class="btn btn-primary">Back to Student</button></a>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/boarding_header.php';
 require_once __DIR__ . '/../components/alert.php';
 ?>
 

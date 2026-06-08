@@ -22,11 +22,16 @@ class App
       : 'Auth';
 
     $baseName = ucfirst($controllerName);
+    $fallbackBaseName = rtrim($baseName, 's');
 
     if (file_exists(__DIR__ . "/../controllers/" . $baseName . "Controller.php")) {
       $this->controller = $baseName . "Controller";
+    } elseif ($fallbackBaseName !== $baseName && file_exists(__DIR__ . "/../controllers/" . $fallbackBaseName . "Controller.php")) {
+      $this->controller = $fallbackBaseName . "Controller";
     } elseif (file_exists(__DIR__ . "/../controllers/" . $baseName . ".php")) {
       $this->controller = $baseName;
+    } elseif ($fallbackBaseName !== $baseName && file_exists(__DIR__ . "/../controllers/" . $fallbackBaseName . ".php")) {
+      $this->controller = $fallbackBaseName;
     } else {
       require __DIR__ . "/../controllers/_404.php";
       $controller = new _404;

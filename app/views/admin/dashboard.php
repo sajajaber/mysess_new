@@ -23,10 +23,9 @@ $totalStaff = (int)($stats->total_teachers    ?? 0)
     + (int)($stats->total_boarding_staff ?? 0)
     + (int)($stats->total_security     ?? 0);
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
 
-require __DIR__ . '/../../../public/assets/css/admin.php';
 ?>
 
 <!-- Stat Cards -->

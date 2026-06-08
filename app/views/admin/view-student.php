@@ -16,10 +16,9 @@ $topbarActions = '
     <a href="' . ROOT . '/admin/edit_student/' . $student->id . '"><button class="btn btn-primary">✏️ Edit</button></a>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
 
-require __DIR__ . '/../../../public/assets/css/admin.php';
 
 $medications    = $medications    ?? [];
 $medLogs        = $medLogs        ?? [];

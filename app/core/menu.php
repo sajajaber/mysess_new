@@ -10,7 +10,7 @@ return [
         'students' => '/nurse/students',
         'health-records' => '/nurse/health-records',
         'medications' => '/nurse/medications',
-        'messages' => '/nurse/messages'
+        'messages' => '/messages/inbox'
     ],
     'admin' => [
         'dashboard' => '/admin/dashboard',
@@ -18,27 +18,27 @@ return [
         'students' => '/admin/students',
         'sessions' => '/admin/sessions',
         'reports' => '/admin/reports',
-        'messages' => '/admin/messages'
+        'messages' => '/messages/inbox'
     ],
     'parent' => [
         'dashboard' => '/parent/dashboard',
         'academic' => '/parent/academic-records',
         'health' => '/parent/health-records',
-        'messages' => '/parent/messages'
+        'messages' => '/messages/inbox'
     ],
     'teacher' => [
         'dashboard' => '/teacher/dashboard',
         'students' => '/teacher/students',
         'sessions' => '/teacher/sessions',
         'progress reports' => '/teacher/progress-reports',
-        'messages' => '/teacher/messages'
+        'messages' => '/messages/inbox'
     ],
     'therapist' => [
         'dashboard' => '/therapist/dashboard',
         'students' => '/therapist/students',
         'iep goals' => '/therapist/iep-goals',
         'sessions' => '/therapist/sessions',
-        'messages' => '/therapist/messages'
+        'messages' => '/messages/inbox'
     ],
     'boarding-staff' => [
         'dashboard' => '/boarding-staff/dashboard',

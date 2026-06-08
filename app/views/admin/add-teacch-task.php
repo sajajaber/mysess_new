@@ -9,8 +9,24 @@ $topbarActions = '
     <a href="' . ROOT . '/admin/teacch-tasks"><button class="btn btn-primary">Back to TEACCH Tasks</button></a>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
+
+$categoryOptions = [];
+foreach ($categories ?? [] as $value => $label) {
+  $categoryOptions[$value] = [
+    'label' => $label,
+    'style' => [
+      'Self-Care'         => 'background:#ecfeff;color:#0f766e;',
+      'Daily Living'      => 'background:#f0fdf4;color:#15803d;',
+      'Classroom Routine' => 'background:#eff6ff;color:#1d4ed8;',
+      'Play/Leisure'      => 'background:#f5f3ff;color:#6d28d9;',
+      'Vocational'        => 'background:#fff7ed;color:#c2410c;',
+      'Communication'     => 'background:#fef2f2;color:#b91c1c;',
+    ][$value] ?? '',
+  ];
+}
+
 ?>
 
 <div class="card">
@@ -26,7 +42,7 @@ require_once __DIR__ . '/../components/alert.php';
         <?php
           renderSelect(
             'category',
-            $categories,
+            $categoryOptions,
             '',
             ['id' => 'category', 'required' => true]
           );
