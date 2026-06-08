@@ -79,7 +79,7 @@ $overallPercent = $scoreCount ? (int)round($scoreSum / $scoreCount) : 0;
       <p style="margin:6px 0 0; color:#64748b;"><?= esc($semesterLabel) ?></p>
     </div>
 
-    <!-- Student + report info -->
+    <!-- Student+ report info -->
     <div style="display:flex; flex-wrap:wrap; gap:24px; margin-bottom:24px;">
       <div>
         <div style="color:#64748b; font-size:13px;">Student</div>
