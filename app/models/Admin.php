@@ -385,4 +385,213 @@ class Admin extends User
       ['student_id' => $student_id]
     );
   }
+
+
+  public function getReportSummary()
+  {
+    $row = $this->query(
+      "SELECT
+          (SELECT COUNT(*) FROM students)                                                AS total_students,
+          (SELECT COUNT(*) FROM students WHERE is_active = 1)                            AS active_students,
+          (SELECT COUNT(*) FROM students WHERE is_active = 0)                            AS archived_students,
+          (SELECT COUNT(*) FROM users WHERE is_active = 1)                               AS total_staff,
+          (SELECT COUNT(*) FROM iep_goals)                                               AS total_goals,
+          (SELECT COUNT(*) FROM iep_goals WHERE status = 'achieved')                     AS goals_met,
+          (SELECT COUNT(*) FROM iep_goals WHERE status = 'active')                       AS goals_active,
+          (SELECT COUNT(*) FROM iep_goals WHERE status = 'discontinued')                 AS goals_discontinued,
+          (SELECT COUNT(*) FROM iep_milestones)                                          AS total_milestones,
+          (SELECT COUNT(*) FROM iep_milestones WHERE is_achieved = 1)                    AS milestones_achieved,
+          (SELECT COUNT(*) FROM teacch_schedules)                                        AS total_schedules,
+          (SELECT COUNT(*) FROM teacch_tasks)                                            AS total_teacch_tasks,
+          (SELECT COUNT(*) FROM classroom_sessions)                                      AS total_classroom_sessions,
+          (SELECT COUNT(*) FROM therapy_sessions)                                        AS total_therapy_sessions,
+          (SELECT COUNT(*) FROM therapy_sessions WHERE status = 'completed')             AS therapy_completed,
+          (SELECT COUNT(*) FROM therapy_sessions WHERE status = 'scheduled')             AS therapy_scheduled,
+          (SELECT COUNT(*) FROM homework)                                                AS total_homework,
+          (SELECT COUNT(*) FROM medications WHERE is_active = 1)                         AS active_medications,
+          (SELECT COUNT(DISTINCT student_id) FROM medications WHERE is_active = 1)       AS students_on_meds,
+          (SELECT COUNT(*) FROM health_events)                                           AS total_health_events,
+          (SELECT COUNT(*) FROM health_events WHERE severity = 'high')                   AS high_severity_events,
+          (SELECT COUNT(*) FROM checkin_logs WHERE DATE(check_time) = CURDATE() AND check_type = 'check_in')  AS checked_in_today,
+          (SELECT COUNT(*) FROM checkin_logs WHERE DATE(check_time) = CURDATE() AND check_type = 'check_out') AS checked_out_today
+      "
+    );
+
+    return $row ? $row[0] : null;
+  }
+
+
+  public function getStudentsByDiagnosis()
+  {
+    return $this->query(
+      "SELECT COALESCE(NULLIF(TRIM(diagnosis), ''), 'Unspecified') AS diagnosis,
+              COUNT(*) AS total
+         FROM students
+        WHERE is_active = 1
+        GROUP BY COALESCE(NULLIF(TRIM(diagnosis), ''), 'Unspecified')
+        ORDER BY total DESC, diagnosis ASC"
+    );
+  }
+
+
+  public function getStudentsByGender()
+  {
+    return $this->query(
+      "SELECT gender, COUNT(*) AS total
+         FROM students
+        WHERE is_active = 1
+        GROUP BY gender"
+    );
+  }
+
+
+  public function getGoalsByCategory()
+  {
+    return $this->query(
+      "SELECT COALESCE(NULLIF(TRIM(category), ''), 'Uncategorized') AS category,
+              COUNT(*) AS total,
+              SUM(CASE WHEN status = 'achieved' THEN 1 ELSE 0 END) AS achieved
+         FROM iep_goals
+        GROUP BY COALESCE(NULLIF(TRIM(category), ''), 'Uncategorized')
+        ORDER BY total DESC"
+    );
+  }
+
+
+  public function getRecentProgressScores($limit = 10)
+  {
+    return $this->query(
+      "SELECT gp.score, gp.recorded_at,
+              ig.goal_text, ig.category,
+              s.first_name AS student_first_name, s.last_name AS student_last_name
+         FROM goal_progress gp
+         JOIN iep_goals ig ON gp.goal_id = ig.id
+         JOIN students   s ON ig.student_id = s.id
+        ORDER BY gp.recorded_at DESC
+        LIMIT :limit",
+      ['limit' => (int)$limit]
+    );
+  }
+
+
+  public function getTopStaffBySessions($limit = 5)
+  {
+    return $this->query(
+      "SELECT u.id, u.first_name, u.last_name, u.role, COUNT(*) AS total
+         FROM (
+           SELECT teacher_id   AS user_id FROM classroom_sessions
+           UNION ALL
+           SELECT therapist_id AS user_id FROM therapy_sessions WHERE status = 'completed'
+         ) t
+         JOIN users u ON u.id = t.user_id
+        GROUP BY u.id, u.first_name, u.last_name, u.role
+        ORDER BY total DESC
+        LIMIT :limit",
+      ['limit' => (int)$limit]
+    );
+  }
+
+
+  public function getMonthlySessions($monthsBack = 6)
+  {
+    return $this->query(
+      "SELECT DATE_FORMAT(d, '%Y-%m') AS ym,
+              SUM(kind = 'class')   AS class_count,
+              SUM(kind = 'therapy') AS therapy_count
+         FROM (
+           SELECT session_date AS d, 'class'   AS kind FROM classroom_sessions
+           UNION ALL
+           SELECT session_date AS d, 'therapy' AS kind FROM therapy_sessions
+         ) all_sessions
+        WHERE d >= DATE_SUB(CURDATE(), INTERVAL :months MONTH)
+        GROUP BY ym
+        ORDER BY ym ASC",
+      ['months' => (int)$monthsBack]
+    );
+  }
+
+
+  public function getMilestonesForStudent($student_id)
+  {
+    return $this->query(
+      "SELECT m.*, ig.goal_text, ig.category
+         FROM iep_milestones m
+         JOIN iep_goals ig ON ig.id = m.goal_id
+        WHERE ig.student_id = :student_id
+        ORDER BY ig.category ASC, m.created_at ASC",
+      ['student_id' => $student_id]
+    );
+  }
+
+
+  public function getClassroomSessionsForStudent($student_id, $limit = 30)
+  {
+    return $this->query(
+      "SELECT cs.*, u.first_name AS teacher_first, u.last_name AS teacher_last
+         FROM classroom_sessions cs
+         LEFT JOIN users u ON cs.teacher_id = u.id
+        WHERE cs.student_id = :student_id
+        ORDER BY cs.session_date DESC, cs.created_at DESC
+        LIMIT :the_limit",
+      ['student_id' => $student_id, 'the_limit' => (int)$limit]
+    );
+  }
+
+
+  public function getTherapySessionsForStudent($student_id, $limit = 30)
+  {
+    return $this->query(
+      "SELECT ts.*, u.first_name AS therapist_first, u.last_name AS therapist_last,
+              ig.goal_text AS goal_addressed
+         FROM therapy_sessions ts
+         LEFT JOIN users u ON ts.therapist_id = u.id
+         LEFT JOIN iep_goals ig ON ts.goal_addressed_id = ig.id
+        WHERE ts.student_id = :student_id
+        ORDER BY ts.session_date DESC, ts.created_at DESC
+        LIMIT :the_limit",
+      ['student_id' => $student_id, 'the_limit' => (int)$limit]
+    );
+  }
+
+
+  public function getObservationsForStudent($student_id, $limit = 20)
+  {
+    return $this->query(
+      "SELECT ao.*, u.first_name AS teacher_first, u.last_name AS teacher_last
+         FROM academic_observations ao
+         LEFT JOIN users u ON ao.teacher_id = u.id
+        WHERE ao.student_id = :student_id
+        ORDER BY ao.created_at DESC
+        LIMIT :the_limit",
+      ['student_id' => $student_id, 'the_limit' => (int)$limit]
+    );
+  }
+
+
+  public function getProgressReportsForStudent($student_id, $limit = 10)
+  {
+    return $this->query(
+      "SELECT pr.*, u.first_name AS teacher_first, u.last_name AS teacher_last
+         FROM progress_reports pr
+         LEFT JOIN users u ON pr.teacher_id = u.id
+        WHERE pr.student_id = :student_id
+        ORDER BY pr.created_at DESC
+        LIMIT :the_limit",
+      ['student_id' => $student_id, 'the_limit' => (int)$limit]
+    );
+  }
+
+
+  public function getHomeworkForStudent($student_id, $limit = 30)
+  {
+    return $this->query(
+      "SELECT h.*, u.first_name AS teacher_first, u.last_name AS teacher_last
+         FROM homework h
+         LEFT JOIN users u ON h.assigned_by = u.id
+        WHERE h.student_id = :student_id
+        ORDER BY h.due_date DESC, h.created_at DESC
+        LIMIT :the_limit",
+      ['student_id' => $student_id, 'the_limit' => (int)$limit]
+    );
+  }
 }

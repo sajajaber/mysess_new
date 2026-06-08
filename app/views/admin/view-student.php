@@ -13,6 +13,7 @@ $pageHeading  = 'Student Profile';
 $activePage   = 'students';
 $topbarActions = '
     <a href="' . ROOT . '/admin/students"><button class="btn btn-primary">← Back to Students</button></a>
+    <a href="' . ROOT . '/admin/student_report/' . $student->id . '"><button class="btn btn-primary">Student Report</button></a>
     <a href="' . ROOT . '/admin/edit_student/' . $student->id . '"><button class="btn btn-primary">✏️ Edit</button></a>
 ';
 

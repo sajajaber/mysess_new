@@ -11,6 +11,9 @@ class AdminController extends Controller
   private $classroomSessionModel;
   private $therapySessionModel;
 
+  private $checkinModel;
+  private $noteModel;
+
   public function __construct()
   {
     if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -26,6 +29,8 @@ class AdminController extends Controller
     $this->healthRecordModel   = new HealthRecord();
     $this->classroomSessionModel = new ClassroomSession();
     $this->therapySessionModel   = new TherapySession();
+    $this->checkinModel          = new CheckinLog();
+    $this->noteModel             = new AttendanceNote();
   }
 
   public function dashboard()
@@ -655,5 +660,78 @@ class AdminController extends Controller
     }
 
     $this->view('admin/add_health_record', ['student' => $student]);
+  }
+
+
+  public function attendance()
+  {
+    $date    = $_GET['date'] ?? date('Y-m-d');
+    $records = $this->checkinModel->getDailyPivot($date);
+    $noteMap = $this->noteModel->getMapForDate($date);
+
+    $this->view('admin/attendance', [
+      'date'    => $date,
+      'records' => $records ?: [],
+      'noteMap' => $noteMap,
+    ]);
+  }
+
+
+  public function reports()
+  {
+    $summary    = $this->adminModel->getReportSummary();
+    $byDiag     = $this->adminModel->getStudentsByDiagnosis();
+    $byGender   = $this->adminModel->getStudentsByGender();
+    $goalsByCat = $this->adminModel->getGoalsByCategory();
+    $recentProg = $this->adminModel->getRecentProgressScores(10);
+    $topStaff   = $this->adminModel->getTopStaffBySessions(5);
+    $monthly    = $this->adminModel->getMonthlySessions(6);
+
+    $this->view('admin/reports', [
+      'summary'    => $summary,
+      'byDiag'     => $byDiag     ?: [],
+      'byGender'   => $byGender   ?: [],
+      'goalsByCat' => $goalsByCat ?: [],
+      'recentProg' => $recentProg ?: [],
+      'topStaff'   => $topStaff   ?: [],
+      'monthly'    => $monthly    ?: [],
+    ]);
+  }
+
+
+  public function student_report($studentId = null)
+  {
+    $studentId = (int)$studentId;
+    $student   = $studentId ? $this->adminModel->getStudentById($studentId) : null;
+
+    if (!$student) {
+      header('Location: ' . ROOT . '/admin/students');
+      exit();
+    }
+
+    $goals       = $this->adminModel->getIepGoalsForStudent($studentId)        ?: [];
+    $milestones  = $this->adminModel->getMilestonesForStudent($studentId)      ?: [];
+    $progress    = $this->adminModel->getGoalProgressForStudent($studentId)    ?: [];
+    $teacch      = $this->adminModel->getTeacchProgressForStudent($studentId)  ?: [];
+    $sessions    = $this->adminModel->getClassroomSessionsForStudent($studentId) ?: [];
+    $therapies   = $this->adminModel->getTherapySessionsForStudent($studentId) ?: [];
+    $observ      = $this->adminModel->getObservationsForStudent($studentId)    ?: [];
+    $reports     = $this->adminModel->getProgressReportsForStudent($studentId) ?: [];
+    $homework    = $this->adminModel->getHomeworkForStudent($studentId)        ?: [];
+    $staff       = $this->adminModel->getAssignedStaffForStudent($studentId)   ?: [];
+
+    $this->view('admin/student-report', [
+      'student'    => $student,
+      'goals'      => $goals,
+      'milestones' => $milestones,
+      'progress'   => $progress,
+      'teacch'     => $teacch,
+      'sessions'   => $sessions,
+      'therapies'  => $therapies,
+      'observ'     => $observ,
+      'reports'    => $reports,
+      'homework'   => $homework,
+      'staff'      => $staff,
+    ]);
   }
 }

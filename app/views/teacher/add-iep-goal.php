@@ -27,7 +27,7 @@ require_once __DIR__ . '/../components/alert.php';
 
       <div class="form-group">
         <label for="category">Category <span style="color:#eb004e">*</span></label>
-        <!-- When the category changes, refill the goal bank picker below -->
+        <!-- refill the goal bank picker below -->
         <?php
           renderSelect(
             'category',

@@ -1,0 +1,136 @@
+/* Each role gets its own calm palette.
+   The variables are read by the rules at the bottom so the sidebar,
+   buttons, card headers and profile initials all pick up the right color
+   automatically. To change a module's color, just edit the hex codes here. */
+
+:root {
+  /* sensible default if a page has no role class (login, error pages, ...) */
+  --module-main:   #4f46e5;
+  --module-dark:   #3730a3;
+  --module-soft:   #eef2ff;
+  --module-accent: #c7d2fe;
+}
+
+
+/* ADMIN: soft blue + sage accent */
+body.role-admin {
+  --module-main:   #92AAC7;
+  --module-dark:   #5d7da4;
+  --module-soft:   #eef3f8;
+  --module-accent: #A1BE95;
+}
+
+/* TEACHER: sage + soft blue accent */
+body.role-teacher {
+  --module-main:   #A1BE95;
+  --module-dark:   #6f9460;
+  --module-soft:   #eff5ec;
+  --module-accent: #92AAC7;
+}
+
+/* THERAPIST: lavender + warm yellow accent */
+body.role-therapist {
+  --module-main:   #B4A7D6;
+  --module-dark:   #7c69ad;
+  --module-soft:   #f1edf7;
+  --module-accent: #E2DFA2;
+}
+
+/* NURSE: coral + soft yellow accent */
+body.role-nurse {
+  --module-main:   #ED5752;
+  --module-dark:   #b73935;
+  --module-soft:   #fdeaea;
+  --module-accent: #E2DFA2;
+}
+
+/* BOARDING STAFF: pale yellow + sage accent */
+body.role-boarding_staff {
+  --module-main:   #E2DFA2;
+  --module-dark:   #a9a45a;
+  --module-soft:   #fbfaeb;
+  --module-accent: #A1BE95;
+}
+
+/* SECURITY GUARD: dusty teal + soft blue accent */
+body.role-security_guard {
+  --module-main:   #8FB8B8;
+  --module-dark:   #5b8585;
+  --module-soft:   #ecf3f3;
+  --module-accent: #92AAC7;
+}
+
+/* PARENT: peach + lavender accent */
+body.role-parent {
+  --module-main:   #E8B4A0;
+  --module-dark:   #b97f67;
+  --module-soft:   #fbeee7;
+  --module-accent: #B4A7D6;
+}
+
+
+/* ---------- the components that take the module color ---------- */
+
+/* the brand word at the top of the sidebar wears the main color */
+body[class*="role-"] .sidebar-logo {
+  color: var(--module-main);
+}
+
+/* sidebar link hover/active state uses the soft tint + dark accent */
+body[class*="role-"] .sidebar a:hover {
+  background: var(--module-soft);
+  background-color: var(--module-soft);
+  color: var(--module-dark);
+  border-left: 3px solid var(--module-main);
+}
+
+/* page title in the topbar gets a quiet hint of the module color */
+body[class*="role-"] .topbar h1 {
+  color: var(--module-dark);
+}
+
+/* primary buttons (the "Add ...", "Save ...", "Print ..." kind) */
+body[class*="role-"] .btn-primary {
+  background: linear-gradient(135deg, var(--module-main) 0%, var(--module-dark) 100%);
+  border: none;
+  color: #fff;
+}
+body[class*="role-"] .btn-primary:hover {
+  filter: brightness(0.96);
+  color: #fff;
+}
+
+/* card header gradients follow the role too */
+body[class*="role-"] .card-header {
+  background: linear-gradient(135deg, var(--module-main) 0%, var(--module-dark) 100%);
+}
+
+/* the colored circle of initials on profile cards */
+body[class*="role-"] .profile-card__initials {
+  background: var(--module-main);
+}
+
+/* section-tabs underline + active label use the module color */
+body[class*="role-"] .section-tab.active {
+  color: var(--module-dark);
+  border-bottom-color: var(--module-main);
+}
+body[class*="role-"] .section-tab:hover {
+  color: var(--module-dark);
+}
+
+/* small accent helper any view can drop in for a calm secondary band */
+body[class*="role-"] .accent-band {
+  background: var(--module-accent);
+  color: #1f2937;
+  padding: 8px 14px;
+  border-radius: 10px;
+}
+
+/* a soft tinted card a view can use to hint at the module without shouting */
+body[class*="role-"] .module-soft-card {
+  background: var(--module-soft);
+  border: 1px solid var(--module-main);
+  border-radius: 10px;
+  padding: 14px;
+}

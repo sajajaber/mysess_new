@@ -10,9 +10,10 @@
   <link rel="stylesheet" href="/../mysess_new/public/assets/css/sidebar.css">
   <link rel="stylesheet" href="/../mysess_new/public/assets/css/topbar.css">
   <link rel="stylesheet" href="/../mysess_new/public/assets/css/boarding.css">
+  <link rel="stylesheet" href="/../mysess_new/public/assets/css/module-colors.css">
 </head>
 
-<body>
+<body class="role-<?= $_SESSION['role'] ?? 'guest' ?>">
 
   <!-- Sidebar Component -->
   <?php require_once __DIR__ . '/../components/sidebar.php'; ?>

@@ -17,6 +17,7 @@ $sidebarItems = [
     'goal bank' => '/admin/goal-bank',
     'teacch tasks' => '/admin/teacch-tasks',
     'sessions' => '/admin/sessions',
+    'attendance' => '/admin/attendance',
     'reports' => '/admin/reports',
     'messages' => '/messages'
   ],
@@ -52,6 +53,10 @@ $sidebarItems = [
     'dashboard' => '/boarding/dashboard',
     'students' => '/boarding/students',
     'daily logs' => '/boarding/daily-logs'
+  ],
+  'security_guard' => [
+    'attendance' => '/security/dashboard',
+    'check ins' => '/security/checkins'
   ]
 ];
 

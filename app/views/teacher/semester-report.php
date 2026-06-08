@@ -75,7 +75,7 @@ $overallPercent = $scoreCount ? (int)round($scoreSum / $scoreCount) : 0;
 
     <!-- Report header -->
     <div style="text-align:center; border-bottom:2px solid #4f46e5; padding-bottom:16px; margin-bottom:24px;">
-      <h1 style="margin:0; font-size:24px;">MySESS Semester Progress Report</h1>
+      <h1 style="margin:0; font-size:24px;">Semester Progress Report</h1>
       <p style="margin:6px 0 0; color:#64748b;"><?= esc($semesterLabel) ?></p>
     </div>
 

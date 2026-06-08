@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS attendance_notes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  student_id INT NOT NULL,
+  note_date DATE NOT NULL,
+  note TEXT,
+  recorded_by INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_student_day (student_id, note_date),
+  FOREIGN KEY (student_id)  REFERENCES students(id) ON DELETE CASCADE,
+  FOREIGN KEY (recorded_by) REFERENCES users(id)    ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -29,7 +29,7 @@ $semesters = $semesters ?? [];
       <a href="<?= ROOT ?>/teacher/students" class="btn btn-primary">My Students</a>
 
     <?php else: ?>
-      <p>Pick a student and a semester. The report is built automatically from their IEP goals, progress scores, milestones, sessions, and observations.</p>
+      <p>Pick a student and a semester to build the progress report.</p>
 
       <!-- GET so the choices land in the URL and the report can be bookmarked or printed -->
       <form method="GET" action="<?= ROOT ?>/teacher/semester-report">

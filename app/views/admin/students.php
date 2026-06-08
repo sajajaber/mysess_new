@@ -57,6 +57,7 @@ $renderRow = function ($student) {
             </span>
         </td>
         <td class='actions'>
+            <a href="<?= ROOT ?>/admin/student_report/<?= $student->id ?>" class='btn-icon btn-view' title='Report'>📄</a>
             <a href="<?= ROOT ?>/admin/edit_student/<?= $student->id ?>" class='btn-icon btn-view' title='Edit'>✏️</a>
             <?php if ($student->is_active): ?>
                 <form method='POST' action='<?= ROOT ?>/admin/archive_student' class='inline-form'

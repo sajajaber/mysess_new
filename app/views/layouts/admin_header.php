@@ -11,11 +11,12 @@
   <link rel="stylesheet" href="/../mysess_new/public/assets/css/topbar.css">
   <link rel="stylesheet" href="/../mysess_new/public/assets/css/display-student.css">
   <link rel="stylesheet" href="/../mysess_new/public/assets/css/admin.css">
+  <link rel="stylesheet" href="/../mysess_new/public/assets/css/module-colors.css">
 </head>
 
-<body>
+<body class="role-<?= $_SESSION['role'] ?? 'guest' ?>">
 
-  <!-- Sidebar Component -->
+
   <?php require_once __DIR__ . '/../components/sidebar.php'; ?>
 
   <main class="main">
