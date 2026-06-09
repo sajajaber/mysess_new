@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="/../mysess_new/public/assets/css/topbar.css">
   <link rel="stylesheet" href="/../mysess_new/public/assets/css/display-student.css">
   <link rel="stylesheet" href="/../mysess_new/public/assets/css/admin.css">
-  <link rel="stylesheet" href="/../mysess_new/public/assets/css/module-colors.css">
 </head>
 
 <body class="role-<?= $_SESSION['role'] ?? 'guest' ?>">

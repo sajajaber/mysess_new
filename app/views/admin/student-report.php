@@ -15,7 +15,7 @@ $topbarActions = '
   <button class="btn" onclick="window.print()">Print / Save PDF</button>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
 
 $goals      = $goals      ?? [];

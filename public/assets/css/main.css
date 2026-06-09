@@ -369,7 +369,9 @@ h1, h2, h3 { color: #1f2937; letter-spacing: -0.01em; }
 }
 .card:hover { box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06); }
 
-.card-header h2 { font-weight: 600; }
+.card-header h2 { font-weight: 600;
+color: #ffffff; font-size: 18px;
+}
 
 
 .data-table-wrapper { overflow-x: auto; }
