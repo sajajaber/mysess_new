@@ -32,9 +32,12 @@ $renderRow = function ($student) {
     <td><?= date('d-m-Y', strtotime($student->date_of_birth)) ?></td>
     <td><?= esc($student->diagnosis ?? '—') ?></td>
     <td class="actions">
-      <a href="<?= ROOT ?>/boarding/student/<?= (int)$student->id ?>" class="btn btn-sm btn-primary">Profile</a>
-      <a href="<?= ROOT ?>/boarding/add-log?student_id=<?= (int)$student->id ?>" class="btn btn-sm">Add Log</a>
-      <a href="<?= ROOT ?>/boarding/add-checkin?student_id=<?= (int)$student->id ?>" class="btn btn-sm">Check In/Out</a>
+      <a href="<?= ROOT ?>/boarding/student/<?= (int)$student->id ?>"             class="btn btn-sm btn-primary">Profile</a>
+      <a href="<?= ROOT ?>/boarding/add-sleep?student_id=<?= (int)$student->id ?>"     class="btn btn-sm">Sleep</a>
+      <a href="<?= ROOT ?>/boarding/add-nutrition?student_id=<?= (int)$student->id ?>" class="btn btn-sm">Nutrition</a>
+      <a href="<?= ROOT ?>/boarding/add-mood?student_id=<?= (int)$student->id ?>"      class="btn btn-sm">Mood</a>
+      <a href="<?= ROOT ?>/boarding/add-activity?student_id=<?= (int)$student->id ?>"  class="btn btn-sm">Activity</a>
+      <a href="<?= ROOT ?>/boarding/add-checkin?student_id=<?= (int)$student->id ?>"   class="btn btn-sm">Check In/Out</a>
     </td>
   </tr>
 <?php

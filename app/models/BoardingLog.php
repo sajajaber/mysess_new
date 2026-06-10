@@ -34,4 +34,18 @@ class BoardingLog extends Model
     $rows = $this->query("SELECT COUNT(*) AS count FROM boarding_logs WHERE log_date = CURDATE()");
     return $rows ? (int)$rows[0]->count : 0;
   }
+
+
+  public function getByTypeRecent($type, $limit = 50)
+  {
+    return $this->query(
+      "SELECT b.*, s.first_name AS student_first_name, s.last_name AS student_last_name
+         FROM boarding_logs b
+         JOIN students s ON s.id = b.student_id
+        WHERE b.log_type = :the_type
+        ORDER BY b.log_date DESC, b.created_at DESC
+        LIMIT :the_limit",
+      ['the_type' => $type, 'the_limit' => (int)$limit]
+    );
+  }
 }

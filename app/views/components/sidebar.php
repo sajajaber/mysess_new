@@ -52,7 +52,10 @@ $sidebarItems = [
   'boarding_staff' => [
     'dashboard' => '/boarding/dashboard',
     'students' => '/boarding/students',
-    'daily logs' => '/boarding/daily-logs'
+    'sleep' => '/boarding/sleep-logs',
+    'nutrition' => '/boarding/nutrition-logs',
+    'mood' => '/boarding/mood-logs',
+    'activity' => '/boarding/activity-logs'
   ],
   'security_guard' => [
     'attendance' => '/security/dashboard',

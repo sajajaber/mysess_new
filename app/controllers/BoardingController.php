@@ -59,37 +59,35 @@ class BoardingController extends Controller
   }
 
 
-  public function daily_logs()
+  public function sleep_logs()
   {
-    $logs = $this->logModel->getRecent(50);
-    $this->view('boarding/daily-logs', ['logs' => $logs ?: []]);
+    $logs = $this->logModel->getByTypeRecent('sleep', 50);
+    $this->view('boarding/sleep-logs', ['logs' => $logs ?: []]);
   }
 
-  public function add_log()
+  public function add_sleep()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $studentId = (int)$_POST['student_id'];
 
       if (trim($_POST['log_date'] ?? '') === '' || trim($_POST['description'] ?? '') === '') {
         $_SESSION['error'] = 'Date and description are required.';
-        header('Location: ' . ROOT . '/boarding/add-log?student_id=' . $studentId);
+        header('Location: ' . ROOT . '/boarding/add-sleep?student_id=' . $studentId);
         exit();
       }
 
       $this->logModel->insert([
-        'student_id'     => $studentId,
-        'log_date'       => $_POST['log_date'],
-        'log_type'       => $_POST['log_type'],
-        'description'    => esc($_POST['description']),
-        'logged_by'      => $_SESSION['user_id'],
-        'mood_indicator' => $_POST['mood_indicator'] ?: null,
-        'appetite_level' => $_POST['appetite_level'] ?: null,
-        'sleep_quality'  => $_POST['sleep_quality']  ?: null,
-        'bedtime'        => $_POST['bedtime']     ?: null,
-        'wakeup_time'    => $_POST['wakeup_time'] ?: null,
+        'student_id'    => $studentId,
+        'log_date'      => $_POST['log_date'],
+        'log_type'      => 'sleep',
+        'description'   => esc($_POST['description']),
+        'logged_by'     => $_SESSION['user_id'],
+        'sleep_quality' => $_POST['sleep_quality'] ?: null,
+        'bedtime'       => $_POST['bedtime']     ?: null,
+        'wakeup_time'   => $_POST['wakeup_time'] ?: null,
       ]);
 
-      $_SESSION['success'] = 'Daily log saved.';
+      $_SESSION['success'] = 'Sleep log saved.';
       header('Location: ' . ROOT . '/boarding/student/' . $studentId);
       exit();
     }
@@ -100,7 +98,129 @@ class BoardingController extends Controller
       exit();
     }
 
-    $this->view('boarding/add-log', ['student' => $student]);
+    $this->view('boarding/add-sleep', ['student' => $student]);
+  }
+
+
+  public function nutrition_logs()
+  {
+    $logs = $this->logModel->getByTypeRecent('meal', 50);
+    $this->view('boarding/nutrition-logs', ['logs' => $logs ?: []]);
+  }
+
+  public function add_nutrition()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $studentId = (int)$_POST['student_id'];
+
+      if (trim($_POST['log_date'] ?? '') === '' || trim($_POST['description'] ?? '') === '') {
+        $_SESSION['error'] = 'Date and description are required.';
+        header('Location: ' . ROOT . '/boarding/add-nutrition?student_id=' . $studentId);
+        exit();
+      }
+
+      $this->logModel->insert([
+        'student_id'     => $studentId,
+        'log_date'       => $_POST['log_date'],
+        'log_type'       => 'meal',
+        'description'    => esc($_POST['description']),
+        'logged_by'      => $_SESSION['user_id'],
+        'appetite_level' => $_POST['appetite_level'] ?: null,
+      ]);
+
+      $_SESSION['success'] = 'Nutrition log saved.';
+      header('Location: ' . ROOT . '/boarding/student/' . $studentId);
+      exit();
+    }
+
+    $student = $this->studentModel->first(['id' => (int)($_GET['student_id'] ?? 0)]);
+    if (!$student) {
+      header('Location: ' . ROOT . '/boarding/students');
+      exit();
+    }
+
+    $this->view('boarding/add-nutrition', ['student' => $student]);
+  }
+
+
+  public function mood_logs()
+  {
+    $logs = $this->logModel->getByTypeRecent('behavior', 50);
+    $this->view('boarding/mood-logs', ['logs' => $logs ?: []]);
+  }
+
+  public function add_mood()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $studentId = (int)$_POST['student_id'];
+
+      if (trim($_POST['log_date'] ?? '') === '' || trim($_POST['description'] ?? '') === '') {
+        $_SESSION['error'] = 'Date and description are required.';
+        header('Location: ' . ROOT . '/boarding/add-mood?student_id=' . $studentId);
+        exit();
+      }
+
+      $this->logModel->insert([
+        'student_id'     => $studentId,
+        'log_date'       => $_POST['log_date'],
+        'log_type'       => 'behavior',
+        'description'    => esc($_POST['description']),
+        'logged_by'      => $_SESSION['user_id'],
+        'mood_indicator' => $_POST['mood_indicator'] ?: null,
+      ]);
+
+      $_SESSION['success'] = 'Mood log saved.';
+      header('Location: ' . ROOT . '/boarding/student/' . $studentId);
+      exit();
+    }
+
+    $student = $this->studentModel->first(['id' => (int)($_GET['student_id'] ?? 0)]);
+    if (!$student) {
+      header('Location: ' . ROOT . '/boarding/students');
+      exit();
+    }
+
+    $this->view('boarding/add-mood', ['student' => $student]);
+  }
+
+
+  public function activity_logs()
+  {
+    $logs = $this->logModel->getByTypeRecent('daily_activity', 50);
+    $this->view('boarding/activity-logs', ['logs' => $logs ?: []]);
+  }
+
+  public function add_activity()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $studentId = (int)$_POST['student_id'];
+
+      if (trim($_POST['log_date'] ?? '') === '' || trim($_POST['description'] ?? '') === '') {
+        $_SESSION['error'] = 'Date and description are required.';
+        header('Location: ' . ROOT . '/boarding/add-activity?student_id=' . $studentId);
+        exit();
+      }
+
+      $this->logModel->insert([
+        'student_id'  => $studentId,
+        'log_date'    => $_POST['log_date'],
+        'log_type'    => 'daily_activity',
+        'description' => esc($_POST['description']),
+        'logged_by'   => $_SESSION['user_id'],
+      ]);
+
+      $_SESSION['success'] = 'Activity log saved.';
+      header('Location: ' . ROOT . '/boarding/student/' . $studentId);
+      exit();
+    }
+
+    $student = $this->studentModel->first(['id' => (int)($_GET['student_id'] ?? 0)]);
+    if (!$student) {
+      header('Location: ' . ROOT . '/boarding/students');
+      exit();
+    }
+
+    $this->view('boarding/add-activity', ['student' => $student]);
   }
 
 

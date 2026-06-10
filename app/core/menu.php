@@ -41,9 +41,11 @@ return [
         'messages' => '/messages/inbox'
     ],
     'boarding-staff' => [
-        'dashboard' => '/boarding-staff/dashboard',
-        'students' => '/boarding-staff/students',
-        'daily logs' => '/boarding-staff/daily-logs',
-        'activities' => '/boarding-staff/activities'
+        'dashboard' => '/boarding/dashboard',
+        'students' => '/boarding/students',
+        'sleep' => '/boarding/sleep-logs',
+        'nutrition' => '/boarding/nutrition-logs',
+        'mood' => '/boarding/mood-logs',
+        'activity' => '/boarding/activity-logs'
     ]
 ];
