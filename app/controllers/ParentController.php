@@ -1,12 +1,15 @@
 <?php
 class ParentController extends Controller
 {
+  private $parentModel;
+
   public function __construct()
   {
     if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'parent') {
       header('Location: ' . ROOT . '/auth/login');
       exit();
     }
+    $this->parentModel = new ParentModel();
   }
 
   public function index()
@@ -17,47 +20,99 @@ class ParentController extends Controller
 
   public function dashboard()
   {
+    $parentId = $_SESSION['user_id'];
+    $children = $this->parentModel->getMyChildren($parentId) ?: [];
+
     $this->view('parent/dashboard', [
-      'studentCount' => 1,
-      'upcomingChecks' => 2,
-      'activeGoals' => 3,
-      'recentUpdates' => [
-        ['Math', 'Teacher', 'Practice fractions and multiplication facts.'],
-        ['Speech', 'Therapist', 'Continue breathing exercises at home.'],
-      ],
+      'children' => $children,
     ]);
   }
 
-  public function academic_records()
+  public function children()
   {
-    $this->view('parent/academic-records', [
-      'studentName' => 'Student Name',
-      'academicNotes' => [
-        ['2026-06-02', 'Reading', 'Ms. Carter', 'Improved fluency during guided reading.'],
-        ['2026-06-05', 'Math', 'Mr. Lee', 'Completed subtraction review with confidence.'],
-      ],
+    $parentId = $_SESSION['user_id'];
+    $children = $this->parentModel->getMyChildren($parentId) ?: [];
+
+    $this->view('parent/children', [
+      'children' => $children,
     ]);
   }
 
-  public function health_records()
+  public function child($studentId = null)
   {
-    $this->view('parent/health-records', [
-      'medicationCount' => 1,
-      'checkInCount' => 2,
-      'supportNotes' => [
-        ['2026-06-03', 'Wellness', 'Hydration reminder after PE.'],
-        ['2026-06-07', 'Medication', 'Evening dose recorded by school nurse.'],
-      ],
+    $studentId = (int)$studentId;
+    $parentId  = $_SESSION['user_id'];
+
+    if (!$studentId || !$this->parentModel->isThisChildMine($studentId, $parentId)) {
+      header('Location: ' . ROOT . '/parent/dashboard');
+      exit();
+    }
+
+    $student = $this->parentModel->first(['id' => $studentId]);
+    if (!$student) {
+      header('Location: ' . ROOT . '/parent/dashboard');
+      exit();
+    }
+
+    $this->view('parent/child', [
+      'student'    => $student,
+      'team'       => $this->parentModel->getCareTeam($studentId)         ?: [],
+      'goals'      => $this->parentModel->getIepGoals($studentId)         ?: [],
+      'milestones' => $this->parentModel->getMilestones($studentId)       ?: [],
+      'progress'   => $this->parentModel->getLatestProgressMap($studentId),
+      'schedules'  => $this->parentModel->getTeacchSchedules($studentId)  ?: [],
+      'teacch'     => $this->parentModel->getTeacchProgress($studentId)   ?: [],
+      'therapy'    => $this->parentModel->getTherapySessions($studentId)  ?: [],
+      'sessions'   => $this->parentModel->getClassroomSessions($studentId)?: [],
+      'observ'     => $this->parentModel->getObservations($studentId)     ?: [],
+      'reports'    => $this->parentModel->getProgressReports($studentId)  ?: [],
+      'homework'   => $this->parentModel->getHomework($studentId)         ?: [],
+      'meds'       => $this->parentModel->getMedications($studentId)      ?: [],
+      'medLogs'    => $this->parentModel->getMedicationLogs($studentId)   ?: [],
+      'events'     => $this->parentModel->getHealthEvents($studentId)     ?: [],
+      'records'    => $this->parentModel->getHealthRecords($studentId)    ?: [],
+      'boarding'   => $this->parentModel->getBoardingLogs($studentId)     ?: [],
+      'checkins'   => $this->parentModel->getCheckins($studentId)         ?: [],
     ]);
   }
 
-  public function academicRecords()
+  public function reports()
   {
-    $this->academic_records();
+    $parentId = $_SESSION['user_id'];
+    $shared   = $this->parentModel->getSharedReports($parentId) ?: [];
+
+    $this->view('parent/reports', [
+      'shared' => $shared,
+    ]);
   }
 
-  public function healthRecords()
+  public function report($studentId = null)
   {
-    $this->health_records();
+    $studentId = (int)$studentId;
+    $parentId  = $_SESSION['user_id'];
+
+    if (!$studentId || !$this->parentModel->isThisChildMine($studentId, $parentId)) {
+      header('Location: ' . ROOT . '/parent/dashboard');
+      exit();
+    }
+
+    if (!$this->parentModel->isReportShared($studentId, $parentId)) {
+      $_SESSION['error'] = 'No report has been shared for this child yet.';
+      header('Location: ' . ROOT . '/parent/reports');
+      exit();
+    }
+
+    $student = $this->parentModel->first(['id' => $studentId]);
+    if (!$student) {
+      header('Location: ' . ROOT . '/parent/dashboard');
+      exit();
+    }
+
+    $reportModel = new StudentReport();
+
+    $this->view('parent/report', [
+      'reportData'    => $reportModel->build($studentId),
+      'boardingStats' => !empty($student->is_boarding) ? $reportModel->boardingStats($studentId) : null,
+    ]);
   }
 }

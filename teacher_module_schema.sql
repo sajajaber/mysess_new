@@ -1,6 +1,5 @@
 
 
--- A class the teacher gave for one student
 CREATE TABLE IF NOT EXISTS classroom_sessions (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     student_id   INT          NOT NULL,
@@ -14,7 +13,7 @@ CREATE TABLE IF NOT EXISTS classroom_sessions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- A note about a student, optionally linked to a session
+
 CREATE TABLE IF NOT EXISTS academic_observations (
     id          INT       AUTO_INCREMENT PRIMARY KEY,
     student_id  INT       NOT NULL,
@@ -28,7 +27,6 @@ CREATE TABLE IF NOT EXISTS academic_observations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- A learning goal for a student (status: active, achieved, on_hold)
 CREATE TABLE IF NOT EXISTS iep_goals (
     id               INT          AUTO_INCREMENT PRIMARY KEY,
     student_id       INT          NOT NULL,
@@ -39,7 +37,6 @@ CREATE TABLE IF NOT EXISTS iep_goals (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- A teacher's update on how a student is doing on a goal
 CREATE TABLE IF NOT EXISTS iep_goal_progress (
     id              INT          AUTO_INCREMENT PRIMARY KEY,
     goal_id         INT          NOT NULL,
@@ -52,7 +49,6 @@ CREATE TABLE IF NOT EXISTS iep_goal_progress (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- A structured progress report submitted by a teacher
 CREATE TABLE IF NOT EXISTS progress_reports (
     id               INT          AUTO_INCREMENT PRIMARY KEY,
     student_id       INT          NOT NULL,

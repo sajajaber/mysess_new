@@ -120,15 +120,16 @@ class Admin extends User
   {
     return $this->query(
       "INSERT INTO students
-          (first_name, last_name, date_of_birth, gender, diagnosis, enrollment_date, guardian_id, is_active)
+          (first_name, last_name, date_of_birth, gender, diagnosis, is_boarding, enrollment_date, guardian_id, is_active)
         VALUES
-          (:first_name, :last_name, :date_of_birth, :gender, :diagnosis, :enrollment_date, :guardian_id, 1)",
+          (:first_name, :last_name, :date_of_birth, :gender, :diagnosis, :is_boarding, :enrollment_date, :guardian_id, 1)",
       [
         'first_name'      => $data['first_name'],
         'last_name'       => $data['last_name'],
         'date_of_birth'   => $data['date_of_birth'],
         'gender'          => $data['gender'],
         'diagnosis'       => $data['diagnosis']      ?? null,
+        'is_boarding'     => !empty($data['is_boarding']) ? 1 : 0,
         'enrollment_date' => $data['enrollment_date'],
         'guardian_id'     => $data['guardian_id']    ?? null,
       ]
@@ -252,6 +253,174 @@ class Admin extends User
   public function getAllParents()
   {
     return $this->where(['role' => 'parent', 'is_active' => 1]);
+  }
+
+  // Distinct non-empty diagnoses across active students (for the filter dropdown)
+  public function getDistinctDiagnoses()
+  {
+    return $this->query(
+      "SELECT DISTINCT diagnosis
+         FROM students
+        WHERE is_active = 1
+          AND diagnosis IS NOT NULL
+          AND diagnosis != ''
+        ORDER BY diagnosis ASC"
+    );
+  }
+
+  // Active students with an exact diagnosis, optionally only boarding ones
+  public function getStudentsByDiagnosisFilter($diagnosis = '', $onlyBoarding = false)
+  {
+    $where = "WHERE is_active = 1";
+    $params = [];
+    if ($diagnosis !== '') {
+      $where .= " AND diagnosis = :diagnosis";
+      $params['diagnosis'] = $diagnosis;
+    }
+    if ($onlyBoarding) {
+      $where .= " AND is_boarding = 1";
+    }
+    return $this->query(
+      "SELECT * FROM students $where ORDER BY last_name ASC",
+      $params
+    );
+  }
+
+  // All active boarding students
+  public function getBoardingStudentsList()
+  {
+    return $this->query(
+      "SELECT * FROM students
+        WHERE is_active = 1 AND is_boarding = 1
+        ORDER BY last_name ASC"
+    );
+  }
+
+  // Active students filtered by name search and/or exact diagnosis
+  public function searchStudents($name = '', $diagnosis = '')
+  {
+    $where  = "WHERE is_active = 1";
+    $params = [];
+    if (trim($name) !== '') {
+      $where .= " AND (first_name LIKE :name OR last_name LIKE :name2)";
+      $params['name']  = '%' . $name . '%';
+      $params['name2'] = '%' . $name . '%';
+    }
+    if (trim($diagnosis) !== '') {
+      $where .= " AND diagnosis = :diagnosis";
+      $params['diagnosis'] = $diagnosis;
+    }
+    return $this->query(
+      "SELECT * FROM students $where ORDER BY last_name ASC",
+      $params
+    );
+  }
+
+  // Share a student's report with the parent (one row is enough)
+  public function shareReport($studentId, $adminId)
+  {
+    $exists = $this->query(
+      "SELECT id FROM shared_reports WHERE student_id = :sid LIMIT 1",
+      ['sid' => $studentId]
+    );
+    if ($exists) {
+      return true;
+    }
+    return $this->query(
+      "INSERT INTO shared_reports (student_id, shared_by) VALUES (:sid, :aid)",
+      ['sid' => $studentId, 'aid' => $adminId]
+    );
+  }
+
+  // Boarding stats for a student's report: averages and breakdowns
+  public function getBoardingStatsForStudent($studentId)
+  {
+    $stats = [
+      'sleep_count'      => 0,
+      'avg_sleep_hours'  => null,
+      'avg_bedtime'      => null,
+      'avg_wakeup'       => null,
+      'sleep_quality'    => [],
+      'mood'             => [],
+      'appetite'         => [],
+      'total_logs'       => 0,
+    ];
+
+    // Sleep: average duration (handles overnight), average bedtime & wakeup
+    $sleepRows = $this->query(
+      "SELECT bedtime, wakeup_time
+         FROM boarding_logs
+        WHERE student_id = :sid AND log_type = 'sleep'
+          AND bedtime IS NOT NULL AND wakeup_time IS NOT NULL",
+      ['sid' => $studentId]
+    ) ?: [];
+
+    if (!empty($sleepRows)) {
+      $totalMins = 0;
+      $bedMins   = 0;
+      $wakeMins  = 0;
+      $n = 0;
+      foreach ($sleepRows as $r) {
+        $bed  = strtotime($r->bedtime);
+        $wake = strtotime($r->wakeup_time);
+        if ($bed === false || $wake === false) continue;
+
+        $bedM  = (int)date('G', $bed) * 60 + (int)date('i', $bed);
+        $wakeM = (int)date('G', $wake) * 60 + (int)date('i', $wake);
+
+        // If wakeup is "earlier" than bedtime, it's the next morning
+        $duration = $wakeM - $bedM;
+        if ($duration <= 0) {
+          $duration += 24 * 60;
+        }
+
+        $totalMins += $duration;
+        $bedMins   += $bedM;
+        $wakeMins  += $wakeM;
+        $n++;
+      }
+      if ($n > 0) {
+        $stats['sleep_count']     = $n;
+        $stats['avg_sleep_hours'] = round($totalMins / $n / 60, 1);
+        $avgBed  = (int)round($bedMins / $n);
+        $avgWake = (int)round($wakeMins / $n);
+        $stats['avg_bedtime'] = sprintf('%02d:%02d', intdiv($avgBed, 60) % 24, $avgBed % 60);
+        $stats['avg_wakeup']  = sprintf('%02d:%02d', intdiv($avgWake, 60) % 24, $avgWake % 60);
+      }
+    }
+
+    // Sleep quality breakdown
+    $stats['sleep_quality'] = $this->countBy($studentId, 'sleep', 'sleep_quality');
+    // Mood breakdown (behavior logs)
+    $stats['mood']          = $this->countBy($studentId, 'behavior', 'mood_indicator');
+    // Appetite breakdown (meal logs)
+    $stats['appetite']      = $this->countBy($studentId, 'meal', 'appetite_level');
+
+    $totalRows = $this->query(
+      "SELECT COUNT(*) AS c FROM boarding_logs WHERE student_id = :sid",
+      ['sid' => $studentId]
+    );
+    $stats['total_logs'] = $totalRows ? (int)$totalRows[0]->c : 0;
+
+    return $stats;
+  }
+
+  // Helper: count rows grouped by an enum column, returned as [value => count]
+  private function countBy($studentId, $logType, $column)
+  {
+    $rows = $this->query(
+      "SELECT $column AS val, COUNT(*) AS c
+         FROM boarding_logs
+        WHERE student_id = :sid AND log_type = :lt AND $column IS NOT NULL
+        GROUP BY $column",
+      ['sid' => $studentId, 'lt' => $logType]
+    ) ?: [];
+
+    $out = [];
+    foreach ($rows as $r) {
+      $out[$r->val] = (int)$r->c;
+    }
+    return $out;
   }
 
   public function getRoles()

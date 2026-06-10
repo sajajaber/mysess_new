@@ -12,18 +12,14 @@ $preparedBy    = $preparedBy    ?? '';
 $studentName = trim($student->first_name . ' ' . $student->last_name) ?: 'Student';
 $pageTitle   = $studentName . ' — Report';
 $pageHeading = 'Student Report';
-$activePage  = 'students';
+$activePage  = 'children';
 
 $topbarActions = '
-  <a href="' . ROOT . '/admin/view_student/' . (int)$student->id . '"><button class="btn btn-primary">Back to Profile</button></a>
-  <form method="POST" action="' . ROOT . '/admin/share_report" style="display:inline;">
-    <input type="hidden" name="student_id" value="' . (int)$student->id . '">
-    <button type="submit" class="btn">Share with Parent</button>
-  </form>
+  <a href="' . ROOT . '/parent/child/' . (int)$student->id . '"><button class="btn btn-primary">Back to Profile</button></a>
   <button class="btn" onclick="window.print()">Print / Save PDF</button>
 ';
 
-require_once __DIR__ . '/../layouts/admin_header.php';
+require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
 
 require __DIR__ . '/../components/student_report_body.php';

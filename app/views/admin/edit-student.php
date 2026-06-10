@@ -85,13 +85,33 @@ $val = function ($field) use ($old, $student) {
       </div>
 
       <div class="form-group">
-        <label for="diagnosis">Diagnosis</label>
-        <textarea id="diagnosis" name="diagnosis" rows="3"><?= esc($val('diagnosis')) ?></textarea>
+        <label for="diagnosis_select">Diagnosis</label>
+        <?php
+          $diagOptions = diagnosisOptions();
+          $curDiag     = $val('diagnosis');
+          $isPreset    = in_array($curDiag, $diagOptions, true);
+        ?>
+        <select id="diagnosis_select" name="diagnosis_select"
+                onchange="document.getElementById('diagnosis_other_wrap').style.display = (this.value === '__other__') ? 'block' : 'none';">
+          <option value="">— Select Diagnosis —</option>
+          <?php foreach ($diagOptions as $d): ?>
+            <option value="<?= esc($d) ?>" <?= ($isPreset && $curDiag === $d) ? 'selected' : '' ?>>
+              <?= esc($d) ?>
+            </option>
+          <?php endforeach; ?>
+          <option value="__other__" <?= ($curDiag !== '' && !$isPreset) ? 'selected' : '' ?>>Other (type below)</option>
+        </select>
+
+        <div id="diagnosis_other_wrap" style="margin-top:8px; display:<?= ($curDiag !== '' && !$isPreset) ? 'block' : 'none' ?>;">
+          <input type="text" id="diagnosis_other" name="diagnosis_other"
+                 placeholder="Type the diagnosis"
+                 value="<?= esc(!$isPreset ? $curDiag : '') ?>">
+        </div>
       </div>
 
       <div class="form-group">
         <button type="submit" class="btn btn-primary">Save Changes</button>
-        <a href="<?= ROOT ?>/app/views/admin/view-student/<?= $student->id ?>" class="btn">Cancel</a>
+        <a href="<?= ROOT ?>/admin/view_student/<?= $student->id ?>" class="btn">Cancel</a>
       </div>
 
       

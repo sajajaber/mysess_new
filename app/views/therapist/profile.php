@@ -48,9 +48,11 @@ $photoPath = $photoFile ? ROOT . '/public/assets/uploads/' . $photoFile : '';
       </div>
 
       <div class="form-group">
-        <label for="email">Email <span style="color:#eb004e">*</span></label>
+        <label for="email">Email</label>
         <input type="email" id="email" name="email"
-               value="<?= esc($user->email) ?>" required>
+               value="<?= esc($user->email) ?>" readonly
+               style="background:#f1f5f9; cursor:not-allowed;">
+        <small style="color:#666;display:block;margin-top:4px;">Email is managed by the admin and cannot be changed here.</small>
       </div>
 
       <div class="form-group">

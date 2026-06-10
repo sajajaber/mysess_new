@@ -136,9 +136,6 @@ $outLockHour    = $outLockHour    ?? 16;
           </button>
         </div>
 
-
-        <!-- The note has its OWN form and OWN Save button.
-             It posts to /security/save-note and is sent to admin straight away. -->
         <form method="POST" action="<?= ROOT ?>/security/save-note"
               id="notes-form-<?= (int)$s->id ?>"
               style="display:none; margin-top:10px;">

@@ -19,12 +19,13 @@ $sidebarItems = [
     'sessions' => '/admin/sessions',
     'attendance' => '/admin/attendance',
     'reports' => '/admin/reports',
+    'student reports' => '/admin/student_reports',
     'messages' => '/messages'
   ],
   'parent' => [
     'dashboard' => '/parent/dashboard',
-    'academic' => '/parent/academic-records',
-    'health' => '/parent/health-records',
+    'my children' => '/parent/children',
+    'reports' => '/parent/reports',
     'messages' => '/messages'
   ],
   'teacher' => [
@@ -55,11 +56,14 @@ $sidebarItems = [
     'sleep' => '/boarding/sleep-logs',
     'nutrition' => '/boarding/nutrition-logs',
     'mood' => '/boarding/mood-logs',
-    'activity' => '/boarding/activity-logs'
+    'activity' => '/boarding/activity-logs',
+    'homework' => '/boarding/homework',
+    'messages' => '/messages'
   ],
   'security_guard' => [
     'attendance' => '/security/dashboard',
-    'check ins' => '/security/checkins'
+    'check ins' => '/security/checkins',
+    'messages' => '/messages'
   ]
 ];
 

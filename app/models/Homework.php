@@ -26,6 +26,26 @@ class Homework extends Model
       ['student_id' => $studentId]
     );
   }
+
+  //Homework for all boarding students assigned to one boarding staff member
+  public function getForBoardingStaff($staffId)
+  {
+    return $this->query(
+      "SELECT h.id, h.student_id, h.title, h.description, h.due_date, h.is_submitted, h.created_at,
+              s.first_name AS student_first_name, s.last_name AS student_last_name,
+              t.first_name AS teacher_first_name, t.last_name AS teacher_last_name
+         FROM homework h
+         JOIN students s ON s.id = h.student_id
+         JOIN student_assignments sa ON sa.student_id = h.student_id
+         LEFT JOIN users t ON t.id = h.assigned_by
+        WHERE sa.user_id = :staff_id
+          AND sa.role_type = 'boarding_staff'
+          AND sa.end_date IS NULL
+          AND s.is_boarding = 1
+        ORDER BY h.due_date ASC",
+      ['staff_id' => $staffId]
+    );
+  }
   public function addHomework($studentId, $assignedBy, $title, $description, $dueDate)
   {
     return $this->query(

@@ -63,6 +63,11 @@ $assignedStaff  = $assignedStaff  ?? [];
       <?php endif; ?>
       <span class="profile-meta-divider">|</span>
       <span class="profile-meta-item">
+        <span class="profile-meta-label">Boarding</span>
+        <span class="profile-meta-value"><?= !empty($student->is_boarding) ? 'Yes' : 'No' ?></span>
+      </span>
+      <span class="profile-meta-divider">|</span>
+      <span class="profile-meta-item">
         <span class="profile-meta-label">Status</span>
         <span class="status-badge status-<?= $student->is_active ? 'active' : 'inactive' ?>">
           <?= $student->is_active ? 'Active' : 'Archived' ?>
@@ -71,7 +76,6 @@ $assignedStaff  = $assignedStaff  ?? [];
     </div>
   </div>
   <div class="profile-card__actions">
-    <a href="<?= ROOT ?>/admin/add_health_record?student_id=<?= $student->id ?>" class="btn btn-info">📝 Add Record</a>
     <?php if ($student->is_active): ?>
       <form method="POST" action="<?= ROOT ?>/admin/archive_student" class="inline-form"
         onsubmit="return confirm('Archive this student?')">
@@ -230,17 +234,92 @@ $assignedStaff  = $assignedStaff  ?? [];
 
 <!-- IEP GOALS -->
 <div id="sec-iep" class="section-panel">
-<!-- fatima -->
+  <?php
+  $data        = $iepGoals;
+  $headers     = ['Goal', 'Category', 'Status', 'Target Date', 'Created By'];
+  $tableTitle  = 'IEP Goals';
+  $tableAction = null;
+  $renderRow   = function ($g) {
+    ob_start(); ?>
+    <tr>
+      <td><?= esc($g->goal_text) ?></td>
+      <td><?= esc($g->category ?: '—') ?></td>
+      <td><span class="status-badge status-<?= $g->status === 'achieved' ? 'active' : 'inactive' ?>"><?= ucfirst(esc($g->status)) ?></span></td>
+      <td><?= $g->target_date ? date('d M Y', strtotime($g->target_date)) : '—' ?></td>
+      <td><?= esc(trim(($g->created_by_first ?? '') . ' ' . ($g->created_by_last ?? '')) ?: '—') ?></td>
+    </tr>
+  <?php return ob_get_clean();
+  };
+  $emptyMessage = 'No IEP goals on file.';
+  require __DIR__ . '/../components/data_table.php';
+  ?>
+
+  <?php
+  $data        = $goalProgress;
+  $headers     = ['Goal', 'Score', 'Notes', 'Recorded By', 'Date'];
+  $tableTitle  = 'Goal Progress';
+  $tableAction = null;
+  $renderRow   = function ($p) {
+    ob_start(); ?>
+    <tr>
+      <td><?= esc($p->goal_text) ?></td>
+      <td><strong><?= (int)$p->score ?>%</strong></td>
+      <td><?= esc($p->notes ?: '—') ?></td>
+      <td><?= esc(trim(($p->recorded_by_first ?? '') . ' ' . ($p->recorded_by_last ?? '')) ?: '—') ?></td>
+      <td><?= date('d M Y', strtotime($p->recorded_at)) ?></td>
+    </tr>
+  <?php return ob_get_clean();
+  };
+  $emptyMessage = 'No progress recorded yet.';
+  require __DIR__ . '/../components/data_table.php';
+  ?>
 </div>
 
 <!-- SESSIONS -->
 <div id="sec-sessions" class="section-panel">
-<!-- fatima -->
+  <?php
+  $data        = $sessions;
+  $headers     = ['Title', 'Type', 'Scheduled', 'Status', 'Created By'];
+  $tableTitle  = 'Sessions';
+  $tableAction = null;
+  $renderRow   = function ($s) {
+    ob_start(); ?>
+    <tr>
+      <td><?= esc($s->title ?? '—') ?></td>
+      <td><?= esc(ucfirst($s->type ?? '')) ?></td>
+      <td><?= $s->scheduled_at ? date('d M Y, H:i', strtotime($s->scheduled_at)) : '—' ?></td>
+      <td><?= esc(ucfirst(str_replace('_', ' ', $s->status ?? ''))) ?></td>
+      <td><?= esc(trim(($s->created_by_first ?? '') . ' ' . ($s->created_by_last ?? '')) ?: '—') ?></td>
+    </tr>
+  <?php return ob_get_clean();
+  };
+  $emptyMessage = 'No sessions recorded.';
+  require __DIR__ . '/../components/data_table.php';
+  ?>
 </div>
 
 <!-- TEACCH  -->
 <div id="sec-teacch" class="section-panel">
-<!-- fatima -->
+  <?php
+  $levelLabels = ['full_prompt' => 'Full prompt', 'partial_prompt' => 'Partial prompt', 'independent' => 'Independent'];
+  $data        = $teacchProgress;
+  $headers     = ['Task', 'Independence', 'Date', 'Recorded By', 'Notes'];
+  $tableTitle  = 'TEACCH Progress';
+  $tableAction = null;
+  $renderRow   = function ($t) use ($levelLabels) {
+    ob_start(); ?>
+    <tr>
+      <td><?= esc($t->task_title ?? '—') ?></td>
+      <td><?= esc($levelLabels[$t->independence_level] ?? '—') ?></td>
+      <td><?= date('d M Y', strtotime($t->session_date)) ?></td>
+      <td><?= esc(trim(($t->recorded_by_first ?? '') . ' ' . ($t->recorded_by_last ?? '')) ?: '—') ?></td>
+      <td><?= esc($t->notes ?: '—') ?></td>
+    </tr>
+  <?php return ob_get_clean();
+  };
+  $emptyMessage = 'No TEACCH progress recorded.';
+  require __DIR__ . '/../components/data_table.php';
+  ?>
 </div>
 
 <script src="<?= ROOT ?>/public/assets/js/display-student.js"></script>

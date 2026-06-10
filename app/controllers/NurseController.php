@@ -9,7 +9,7 @@ class NurseController extends Controller
 
     public function __construct()
     {
-        // Role guard — redirect anyone who isn't a logged-in nurse
+        //redirect anyone who isn't a logged-in nurse
         if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'nurse') {
             header('Location: ' . ROOT . '/auth/login');
             exit();
@@ -147,8 +147,12 @@ class NurseController extends Controller
         }
 
         $student_id = (int)($_GET['student_id'] ?? 0);
-        $student    = $student_id ? $this->studentModel->first(['id' => $student_id]) : null;
-        $this->view('nurse/add_medication', ['student' => $student]);
+        $url = ROOT . '/nurse/all_medications';
+        if ($student_id) {
+            $url .= '?student_id=' . $student_id . '&open=1';
+        }
+        header('Location: ' . $url);
+        exit();
     }
 
     // /nurse/log_dose

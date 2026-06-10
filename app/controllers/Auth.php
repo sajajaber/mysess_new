@@ -25,7 +25,6 @@ class Auth extends Controller
 
   public function login()
   {
-    // Already logged in — send to their dashboard
     if (isset($_SESSION['user_id'])) {
       header('Location: ' . ROOT . '/' . $this->getRoleRedirect($_SESSION['role']));
       exit();

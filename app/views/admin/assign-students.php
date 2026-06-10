@@ -12,17 +12,14 @@ $topbarActions = '
 require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
 
-$nurses      = $nurses      ?? [];
-$teachers    = $teachers    ?? [];
-$therapists  = $therapists  ?? [];
-$students    = $students    ?? [];
-$assignments = $assignments ?? [];
-
-// Build student options for dropdowns
-$studentOptions = '<option value="">— Select Student —</option>';
-foreach ($students as $s) {
-  $studentOptions .= '<option value="' . $s->id . '">' . esc($s->first_name . ' ' . $s->last_name) . '</option>';
-}
+$nurses           = $nurses           ?? [];
+$teachers         = $teachers         ?? [];
+$therapists       = $therapists       ?? [];
+$boardingStaff    = $boardingStaff    ?? [];
+$students         = $students         ?? [];
+$boardingStudents = $boardingStudents ?? [];
+$assignments      = $assignments      ?? [];
+$diagnoses        = $diagnoses        ?? [];
 ?>
 
 <!-- Tabs -->
@@ -36,11 +33,14 @@ foreach ($students as $s) {
   <button class="section-tab" data-target="sec-therapists">
     Therapists <span class="tab-count"><?= count($therapists) ?></span>
   </button>
+  <button class="section-tab" data-target="sec-boarding">
+    Boarding Staff <span class="tab-count"><?= count($boardingStaff) ?></span>
+  </button>
 </div>
 
 
 <?php
-function staffCard($staff, $assignments, $students, $role, $rootUrl) {
+function staffCard($staff, $assignments, $students, $role, $rootUrl, $diagnoses) {
     $assigned    = $assignments[$staff->id] ?? [];
     $assignedIds = array_map(fn($s) => $s->id, $assigned);
 
@@ -86,8 +86,8 @@ function staffCard($staff, $assignments, $students, $role, $rootUrl) {
             <div class="assignment-card__empty">No students assigned yet.</div>
         <?php endif; ?>
 
-        <!-- Add assignment — only show if there are unassigned students -->
-        <?php if (!empty($studentOptions) && count($students) > count($assignedIds)): ?>
+        <!-- Add a single student -->
+        <?php if (count($students) > count($assignedIds)): ?>
             <form method="POST" action="<?= $rootUrl ?>/admin/assign_students" class="assignment-add-form">
                 <input type="hidden" name="action"  value="assign">
                 <input type="hidden" name="user_id" value="<?= $staff->id ?>">
@@ -99,6 +99,24 @@ function staffCard($staff, $assignments, $students, $role, $rootUrl) {
             </form>
         <?php else: ?>
             <div class="assignment-card__empty">All students assigned.</div>
+        <?php endif; ?>
+
+        <!-- Assign a whole diagnosis group -->
+        <?php if (!empty($diagnoses)): ?>
+            <form method="POST" action="<?= $rootUrl ?>/admin/assign_students" class="assignment-add-form"
+                  style="margin-top:8px;"
+                  onsubmit="return confirm('Assign all students with this diagnosis?')">
+                <input type="hidden" name="action"  value="assign_by_diagnosis">
+                <input type="hidden" name="user_id" value="<?= $staff->id ?>">
+                <input type="hidden" name="role"    value="<?= $role ?>">
+                <select name="diagnosis" required>
+                    <option value="">— By diagnosis —</option>
+                    <?php foreach ($diagnoses as $d): ?>
+                        <option value="<?= esc($d->diagnosis) ?>"><?= esc($d->diagnosis) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="btn btn-sm">+ Assign group</button>
+            </form>
         <?php endif; ?>
 
     </div>
@@ -114,7 +132,7 @@ function staffCard($staff, $assignments, $students, $role, $rootUrl) {
   <?php else: ?>
     <div class="assignment-grid">
       <?php foreach ($nurses as $staff): ?>
-        <?= staffCard($staff, $assignments, $students, 'nurse', ROOT) ?>
+        <?= staffCard($staff, $assignments, $students, 'nurse', ROOT, $diagnoses) ?>
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
@@ -127,7 +145,7 @@ function staffCard($staff, $assignments, $students, $role, $rootUrl) {
   <?php else: ?>
     <div class="assignment-grid">
       <?php foreach ($teachers as $staff): ?>
-        <?= staffCard($staff, $assignments, $students, 'teacher', ROOT) ?>
+        <?= staffCard($staff, $assignments, $students, 'teacher', ROOT, $diagnoses) ?>
       <?php endforeach; ?>
     </div>
   <?php endif; ?>
@@ -140,7 +158,22 @@ function staffCard($staff, $assignments, $students, $role, $rootUrl) {
   <?php else: ?>
     <div class="assignment-grid">
       <?php foreach ($therapists as $staff): ?>
-        <?= staffCard($staff, $assignments, $students, 'therapist', ROOT) ?>
+        <?= staffCard($staff, $assignments, $students, 'therapist', ROOT, $diagnoses) ?>
+      <?php endforeach; ?>
+    </div>
+  <?php endif; ?>
+</div>
+
+<!-- Boarding Staff (boarding students only) -->
+<div id="sec-boarding" class="section-panel">
+  <?php if (empty($boardingStaff)): ?>
+    <div class="empty-state">No boarding staff found.</div>
+  <?php elseif (empty($boardingStudents)): ?>
+    <div class="empty-state">No boarding students yet. Mark students as boarding in the Add Student form.</div>
+  <?php else: ?>
+    <div class="assignment-grid">
+      <?php foreach ($boardingStaff as $staff): ?>
+        <?= staffCard($staff, $assignments, $boardingStudents, 'boarding_staff', ROOT, $diagnoses) ?>
       <?php endforeach; ?>
     </div>
   <?php endif; ?>

@@ -60,4 +60,18 @@ require __DIR__ . '/../components/data_table.php';
 require __DIR__ . '/add-medication.php';
 ?>
 
+<script>
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('open') === '1') {
+      openModal('addMedicationModal');
+      const sid = params.get('student_id');
+      if (sid) {
+        const sel = document.querySelector('#addMedicationModal select[name="student_id"]');
+        if (sel) { sel.value = sid; }
+      }
+    }
+  })();
+</script>
+
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

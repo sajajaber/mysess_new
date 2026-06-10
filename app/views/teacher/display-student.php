@@ -23,7 +23,7 @@ require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
 ?>
 
-<!-- Student header card -->
+
 <div class="profile-card">
   <div class="profile-card__initials">
     <?= strtoupper(substr($student->first_name, 0, 1) . substr($student->last_name, 0, 1)) ?>
@@ -59,7 +59,7 @@ require_once __DIR__ . '/../components/alert.php';
   </div>
 </div>
 
-<!-- Section tabs -->
+
 <div class="section-tabs">
   <button class="section-tab active" data-target="sec-sessions">Classroom Sessions</button>
   <button class="section-tab" data-target="sec-observations">Academic Observations</button>
@@ -69,7 +69,7 @@ require_once __DIR__ . '/../components/alert.php';
   <button class="section-tab" data-target="sec-homework">Homework</button>
 </div>
 
-<!-- Classroom Sessions -->
+
 <div id="sec-sessions" class="section-panel active">
 <?php
 $data    = $sessions ?? [];
@@ -86,7 +86,7 @@ require __DIR__ . '/../components/data_table.php';
 ?>
 </div>
 
-<!-- Academic Observations -->
+
 <div id="sec-observations" class="section-panel">
 <?php
 $data    = $observations ?? [];
@@ -102,7 +102,7 @@ require __DIR__ . '/../components/data_table.php';
 ?>
 </div>
 
-<!-- IEP Goals & Progress -->
+
 <div id="sec-iep" class="section-panel">
 
 <?php
@@ -122,7 +122,6 @@ require __DIR__ . '/../components/data_table.php';
 ?>
 </div>
 
-<!-- Progress Reports -->
 <div id="sec-reports" class="section-panel">
 <?php
 $data    = $reports ?? [];
@@ -140,7 +139,7 @@ require __DIR__ . '/../components/data_table.php';
 ?>
 </div>
 
-<!-- TEACCH -->
+
 <div id="sec-teacch" class="section-panel">
 <?php
 $data    = $schedules ?? [];
@@ -157,7 +156,7 @@ $emptyMessage = 'No schedules yet. Create one below.';
 require __DIR__ . '/../components/data_table.php';
 ?>
 
-  <!-- Create a new schedule for this student -->
+
   <form method="POST" action="<?= ROOT ?>/teacher/add-schedule" style="margin-top:16px;">
     <input type="hidden" name="student_id" value="<?= (int)$student->id ?>">
     <div class="form-group">
@@ -168,7 +167,7 @@ require __DIR__ . '/../components/data_table.php';
   </form>
 </div>
 
-<!-- Homework -->
+
 <div id="sec-homework" class="section-panel">
 <?php
 $data    = $homework ?? [];
@@ -184,7 +183,7 @@ $emptyMessage = 'No homework yet for this student.';
 require __DIR__ . '/../components/data_table.php';
 ?>
 
-  <!-- Quick link to assign new homework -->
+
   <a href="<?= ROOT ?>/teacher/assign-homework" class="btn btn-primary" style="margin-top:16px;">Assign Homework</a>
 </div>
 

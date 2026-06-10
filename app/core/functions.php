@@ -100,4 +100,34 @@ function renderSelect($name, $options, $selected = null, $attributes = [])
     </select>
 <?php
 }
-?>
+
+function diagnosisOptions()
+{
+    return [
+        'Autism Spectrum Disorder (ASD)',
+        'Attention Deficit Hyperactivity Disorder (ADHD)',
+        'Down Syndrome',
+        'Cerebral Palsy',
+        'Intellectual Disability',
+        'Global Developmental Delay',
+        'Specific Learning Disability',
+        'Dyslexia',
+        'Dyscalculia',
+        'Dysgraphia',
+        'Speech and Language Disorder',
+        'Hearing Impairment',
+        'Visual Impairment',
+        'Epilepsy',
+        'Sensory Processing Disorder',
+        'Emotional and Behavioral Disorder',
+        'Anxiety Disorder',
+        'Obsessive Compulsive Disorder (OCD)',
+        'Tourette Syndrome',
+        'Fragile X Syndrome',
+        'Rett Syndrome',
+        'Muscular Dystrophy',
+        'Spina Bifida',
+        'Traumatic Brain Injury',
+        'Multiple Disabilities',
+    ];
+}

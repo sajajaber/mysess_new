@@ -110,14 +110,12 @@ class TherapistController extends Controller
   public function semester_report()
   {
     $therapistId = $_SESSION['user_id'];
-    $semesters   = $this->semesterOptions();
+    $reportModel = new StudentReport();
 
     $studentId = (int)($_GET['student_id'] ?? 0);
-    $semester  = $_GET['semester'] ?? '';
-    if (!$studentId || $semester === '') {
+    if (!$studentId) {
       $this->view('therapist/semester-report-form', [
-        'students'  => $this->therapistModel->getMyStudents($therapistId) ?: [],
-        'semesters' => $semesters,
+        'students' => $this->therapistModel->getMyStudents($therapistId) ?: [],
       ]);
       return;
     }
@@ -126,120 +124,12 @@ class TherapistController extends Controller
       header('Location: ' . ROOT . '/therapist/students');
       exit();
     }
-    if (!isset($semesters[$semester])) {
-      $_SESSION['error'] = 'Please choose a valid semester.';
-      header('Location: ' . ROOT . '/therapist/semester-report');
-      exit();
-    }
-
-    list($startDate, $endDate) = explode('|', $semester);
-    $goals  = $this->iepGoalModel->getGoalsForReport($studentId) ?: [];
-    $report = [];
-
-    foreach ($goals as $goal) {
-      $baseline = $this->progressModel->getBaselineScoreInRange((int)$goal->id, $startDate, $endDate);
-      $current  = $this->progressModel->getLatestScoreInRange((int)$goal->id, $startDate, $endDate);
-      $entries  = $this->progressModel->countInRange((int)$goal->id, $startDate, $endDate);
-
-      $milestones    = $this->milestoneModel->getForGoal((int)$goal->id) ?: [];
-      $achievedCount = 0;
-      foreach ($milestones as $m) {
-        if ($m->is_achieved) {
-          $achievedCount++;
-        }
-      }
-
-      $report[] = [
-        'goal'           => $goal,
-        'baseline'       => $baseline,
-        'current'        => $current,
-        'change'         => ($baseline !== null && $current !== null) ? $current - $baseline : null,
-        'entries'        => $entries,
-        'status'         => $this->goalStatusLabel($goal->status, $current),
-        'milestones'     => $milestones,
-        'milestoneDone'  => $achievedCount,
-        'milestoneTotal' => count($milestones),
-      ];
-    }
-
-    $sessions = $this->sessionModel->getSessionsForStudentInRange($studentId, $startDate, $endDate) ?: [];
-    $teacch   = $this->compileTeacch($studentId, $startDate, $endDate);
 
     $this->view('therapist/semester-report', [
-      'student'       => $student,
-      'semesterLabel' => $semesters[$semester],
-      'startDate'     => $startDate,
-      'endDate'       => $endDate,
-      'report'        => $report,
-      'sessions'      => $sessions,
-      'teacch'        => $teacch,
-      'therapistName' => $_SESSION['user_name'] ?? '',
+      'reportData'    => $reportModel->build($studentId),
+      'preparedBy'    => $_SESSION['user_name'] ?? '',
+      'boardingStats' => !empty($student->is_boarding) ? $reportModel->boardingStats($studentId) : null,
     ]);
-  }
-  private function goalStatusLabel($status, $currentScore)
-  {
-    if ($status === 'achieved') {
-      return 'Met';
-    }
-    if ($currentScore === null) {
-      return 'Not Met';
-    }
-    if ($currentScore >= 80) {
-      return 'Met';
-    }
-    if ($currentScore > 0) {
-      return 'In Progress';
-    }
-    return 'Not Met';
-  }
-  private function compileTeacch($studentId, $startDate, $endDate)
-  {
-    $levelToPercent = [
-      'full_prompt'    => 33,
-      'partial_prompt' => 66,
-      'independent'    => 100,
-    ];
-
-    $schedules = $this->teacchScheduleModel->getForStudent($studentId) ?: [];
-    $blocks    = [];
-
-    foreach ($schedules as $schedule) {
-      $tasks    = $this->teacchTaskModel->getForSchedule((int)$schedule->id) ?: [];
-      $taskRows = [];
-      $sum      = 0;
-      $rated    = 0;
-
-      foreach ($tasks as $task) {
-        $latest = $this->teacchProgressModel->getLatestForTaskInRange((int)$task->id, $startDate, $endDate);
-        $count  = $this->teacchProgressModel->countForTaskInRange((int)$task->id, $startDate, $endDate);
-
-        $level   = $latest ? $latest->independence_level : null;
-        $percent = $level ? $levelToPercent[$level] : 0;
-
-        if ($level) {
-          $sum += $percent;
-          $rated++;
-        }
-
-        $taskRows[] = [
-          'title'   => $task->title,
-          'order'   => $task->task_order,
-          'level'   => $level,
-          'percent' => $percent,
-          'entries' => $count,
-        ];
-      }
-
-      $blocks[] = [
-        'title'   => $schedule->title,
-        'tasks'   => $taskRows,
-        'percent' => $rated ? (int)round($sum / $rated) : 0,
-        'rated'   => $rated,
-        'total'   => count($tasks),
-      ];
-    }
-
-    return $blocks;
   }
   public function schedule_session()
   {
@@ -494,20 +384,15 @@ class TherapistController extends Controller
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $firstName = trim($_POST['first_name'] ?? '');
       $lastName  = trim($_POST['last_name'] ?? '');
-      $email     = trim($_POST['email'] ?? '');
       $phone     = trim($_POST['phone'] ?? '');
-      if ($firstName === '' || $lastName === '' || $email === '') {
-        $_SESSION['error'] = 'First name, last name, and email are required.';
-        header('Location: ' . ROOT . '/therapist/profile');
-        exit();
-      }
-      if ($userModel->emailTakenByOther($email, $userId)) {
-        $_SESSION['error'] = 'That email is already used by another account.';
+      $email     = $userModel->getById($userId)->email;
+      if ($firstName === '' || $lastName === '') {
+        $_SESSION['error'] = 'First name and last name are required.';
         header('Location: ' . ROOT . '/therapist/profile');
         exit();
       }
 
-      $userModel->updateProfile($userId, esc($firstName), esc($lastName), esc($email), esc($phone));
+      $userModel->updateProfile($userId, esc($firstName), esc($lastName), $email, esc($phone));
       $photoError = $this->saveProfilePhoto($userId);
       if ($photoError) {
         $_SESSION['error'] = $photoError;

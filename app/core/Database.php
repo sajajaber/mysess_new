@@ -20,9 +20,6 @@ trait Database
       $con = $this->connect();
       $stm = $con->prepare($query);
 
-      // PDO cannot bind integer-only params (LIMIT / OFFSET) via execute().
-      // We detect keys whose values are plain integers and bind them explicitly
-      // with PARAM_INT so MySQL accepts them in LIMIT / OFFSET clauses.
       foreach ($data as $key => $value) {
         $paramKey = ':' . ltrim($key, ':');
         if (is_int($value)) {

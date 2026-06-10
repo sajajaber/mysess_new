@@ -52,7 +52,7 @@ require_once __DIR__ . '/../components/alert.php';
   </div>
 
   <div class="profile-card__actions">
-    <a href="<?= ROOT ?>/nurse/add_medication?student_id=<?= $student->id ?>" class="btn btn-primary">💊 Add Medication</a>
+    <a href="<?= ROOT ?>/nurse/all_medications?student_id=<?= $student->id ?>&open=1" class="btn btn-primary">💊 Add Medication</a>
     <a href="<?= ROOT ?>/nurse/log_health_event?student_id=<?= $student->id ?>" class="btn btn-warning">⚠️ Log Event</a>
     <a href="<?= ROOT ?>/nurse/add_health_record?student_id=<?= $student->id ?>" class="btn btn-info">📝 Add Record</a>
   </div>
@@ -72,7 +72,7 @@ require_once __DIR__ . '/../components/alert.php';
 $data        = $medications ?? [];
 $headers     = ['Medication', 'Dosage', 'Frequency', 'Instructions', 'Actions'];
 $tableTitle  = 'Medications';
-$tableAction = '<a href="' . ROOT . '/nurse/add_medication?student_id=' . $student->id . '" class="btn btn-sm btn-primary">+ Add Medication</a>';
+$tableAction = '<a href="' . ROOT . '/nurse/all_medications?student_id=' . $student->id . '&open=1" class="btn btn-sm btn-primary">+ Add Medication</a>';
 $renderRow   = function ($med) use ($student) { ob_start(); ?>
   <tr>
     <td><strong><?= esc($med->name) ?></strong></td>

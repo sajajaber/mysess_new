@@ -74,8 +74,36 @@ unset($_SESSION['old']);
       </div>
 
       <div class="form-group">
-        <label for="diagnosis">Diagnosis</label>
-        <textarea id="diagnosis" name="diagnosis" rows="3"><?= esc($old['diagnosis'] ?? '') ?></textarea>
+        <label for="diagnosis_select">Diagnosis</label>
+        <?php
+          $diagOptions = diagnosisOptions();
+          $oldDiag     = $old['diagnosis'] ?? '';
+          $isPreset    = in_array($oldDiag, $diagOptions, true);
+        ?>
+        <select id="diagnosis_select" name="diagnosis_select"
+                onchange="document.getElementById('diagnosis_other_wrap').style.display = (this.value === '__other__') ? 'block' : 'none';">
+          <option value="">— Select Diagnosis —</option>
+          <?php foreach ($diagOptions as $d): ?>
+            <option value="<?= esc($d) ?>" <?= ($isPreset && $oldDiag === $d) ? 'selected' : '' ?>>
+              <?= esc($d) ?>
+            </option>
+          <?php endforeach; ?>
+          <option value="__other__" <?= ($oldDiag !== '' && !$isPreset) ? 'selected' : '' ?>>Other (type below)</option>
+        </select>
+
+        <div id="diagnosis_other_wrap" style="margin-top:8px; display:<?= ($oldDiag !== '' && !$isPreset) ? 'block' : 'none' ?>;">
+          <input type="text" id="diagnosis_other" name="diagnosis_other"
+                 placeholder="Type the diagnosis"
+                 value="<?= esc(!$isPreset ? $oldDiag : '') ?>">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" name="is_boarding" value="1"
+                 <?= !empty($old['is_boarding']) ? 'checked' : '' ?>>
+          This student is a boarding (residential) student
+        </label>
       </div>
 
       <div class="form-group">

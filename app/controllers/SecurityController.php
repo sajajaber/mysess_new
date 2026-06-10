@@ -5,8 +5,8 @@ class SecurityController extends Controller
   private $checkinModel;
   private $noteModel;
 
-  const CHECK_IN_LOCK_HOUR  = 9;
-  const CHECK_OUT_LOCK_HOUR = 16;
+  const CHECK_IN_LOCK_HOUR  = 24;
+  const CHECK_OUT_LOCK_HOUR = 24;
 
   public function __construct()
   {
@@ -124,8 +124,29 @@ class SecurityController extends Controller
         . ' recorded for ' . trim($student->first_name . ' ' . $student->last_name) . '.';
     }
 
+    $this->notifyParent($student, $checkType, $whenString);
+
     header('Location: ' . ROOT . '/security/dashboard');
     exit();
+  }
+
+
+  private function notifyParent($student, $checkType, $whenString)
+  {
+    $parentId = (int)($student->guardian_id ?? 0);
+    if (!$parentId) {
+      return;
+    }
+
+    $childName = trim($student->first_name . ' ' . $student->last_name);
+    $action    = $checkType === 'check_in' ? 'checked in' : 'checked out';
+    $when      = date('d M Y, H:i', strtotime($whenString));
+
+    $subject = ucfirst($action) . ': ' . $childName;
+    $body    = $childName . ' has ' . $action . ' at school on ' . $when . '.';
+
+    $msg = new Message();
+    $msg->send($_SESSION['user_id'], $parentId, $subject, $body);
   }
 
 

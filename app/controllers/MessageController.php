@@ -86,8 +86,8 @@ class MessageController extends Controller
       $this->messageModel->send(
         $user_id,
         $receiver_id,
-        esc($subject),
-        esc($body)
+        $subject,
+        $body
       );
 
       $_SESSION['success'] = 'Message sent successfully.';
@@ -204,8 +204,8 @@ class MessageController extends Controller
       $this->broadcastModel->send(
         $_SESSION['user_id'],
         $targetRoles,
-        esc($subject),
-        esc($body)
+        $subject,
+        $body
       );
 
       $_SESSION['success'] =

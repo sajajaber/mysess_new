@@ -16,6 +16,11 @@ composer.lock
 *.log
 *.tmp
 
+# Project export artifacts
+*.docx
+*.docx.pdf
+tutorial.html
+
 # Local environment
 .env
 .env.local

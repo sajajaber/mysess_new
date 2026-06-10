@@ -70,6 +70,8 @@ class AdminController extends Controller
 
       if (empty($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL))
         $errors[] = 'A valid email is required.';
+      elseif (!str_ends_with(strtolower($_POST['email']), '@mysess.com'))
+        $errors[] = 'Email must end with @mysess.com';
       elseif ($this->adminModel->emailExists($_POST['email']))
         $errors[] = 'Email is already taken.';
 
@@ -128,6 +130,8 @@ class AdminController extends Controller
 
       if (empty($_POST['email']) || !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL))
         $errors[] = 'A valid email is required.';
+      elseif (!str_ends_with(strtolower($_POST['email']), '@mysess.com'))
+        $errors[] = 'Email must end with @mysess.com';
       elseif ($this->adminModel->emailExists($_POST['email'], $id))
         $errors[] = 'Email is already taken by another user.';
 
@@ -253,7 +257,8 @@ class AdminController extends Controller
         'last_name'       => esc($_POST['last_name']),
         'date_of_birth'   => $_POST['date_of_birth'],
         'gender'          => $_POST['gender'],
-        'diagnosis'       => esc($_POST['diagnosis'] ?? ''),
+        'diagnosis'       => $this->resolveDiagnosis(),
+        'is_boarding'     => !empty($_POST['is_boarding']) ? 1 : 0,
         'enrollment_date' => $_POST['enrollment_date'],
         'guardian_id'     => !empty($_POST['guardian_id']) ? (int)$_POST['guardian_id'] : null,
       ]);
@@ -266,6 +271,16 @@ class AdminController extends Controller
     $this->view('admin/add-student', [
       'parents' => $this->adminModel->getAllParents() ?: [],
     ]);
+  }
+
+  // Combine the diagnosis dropdown and the "other" text box into one value
+  private function resolveDiagnosis()
+  {
+    $select = $_POST['diagnosis_select'] ?? '';
+    if ($select === '__other__') {
+      return esc(trim($_POST['diagnosis_other'] ?? ''));
+    }
+    return esc(trim($select));
   }
 
   public function edit_student($id)
@@ -283,7 +298,7 @@ class AdminController extends Controller
         'last_name'       => esc($_POST['last_name']),
         'date_of_birth'   => $_POST['date_of_birth'],
         'gender'          => $_POST['gender'],
-        'diagnosis'       => esc($_POST['diagnosis'] ?? ''),
+        'diagnosis'       => $this->resolveDiagnosis(),
         'enrollment_date' => $_POST['enrollment_date'],
         'guardian_id'     => !empty($_POST['guardian_id']) ? (int)$_POST['guardian_id'] : null,
       ]);
@@ -323,24 +338,23 @@ class AdminController extends Controller
 
   public function assign_students()
   {
-    $nurses     = $this->adminModel->getStaffByRole('nurse')     ?: [];
-    $teachers   = $this->adminModel->getStaffByRole('teacher')   ?: [];
-    $therapists = $this->adminModel->getStaffByRole('therapist') ?: [];
-    $students   = $this->adminModel->getAllStudents()             ?: [];
+    $nurses        = $this->adminModel->getStaffByRole('nurse')          ?: [];
+    $teachers      = $this->adminModel->getStaffByRole('teacher')        ?: [];
+    $therapists    = $this->adminModel->getStaffByRole('therapist')      ?: [];
+    $boardingStaff = $this->adminModel->getStaffByRole('boarding_staff') ?: [];
+    $students         = $this->adminModel->getAllStudents()         ?: [];
+    $boardingStudents = $this->adminModel->getBoardingStudentsList() ?: [];
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $action     = $_POST['action']     ?? '';
-      $student_id = (int)$_POST['student_id'];
-      $user_id    = (int)$_POST['user_id'];
+      $student_id = (int)($_POST['student_id'] ?? 0);
+      $user_id    = (int)($_POST['user_id'] ?? 0);
       $role       = $_POST['role'] ?? '';
 
       if ($action === 'assign') {
-        if ($role === 'nurse') {
-          $this->adminModel->assignStudentToNurse($student_id, $user_id);
-        } else {
-          $this->adminModel->assignStudentToStaff($student_id, $user_id, $role);
-        }
+        $this->assignOne($student_id, $user_id, $role);
         $_SESSION['success'] = 'Student assigned successfully.';
+
       } elseif ($action === 'remove') {
         if ($role === 'nurse') {
           $this->adminModel->removeNurseAssignment($student_id, $user_id);
@@ -348,26 +362,51 @@ class AdminController extends Controller
           $this->adminModel->removeStaffAssignment($student_id, $user_id, $role);
         }
         $_SESSION['success'] = 'Assignment removed successfully.';
+
+      } elseif ($action === 'assign_by_diagnosis') {
+        $diagnosis = $_POST['diagnosis'] ?? '';
+        $onlyBoarding = ($role === 'boarding_staff');
+        $matches = $this->adminModel->getStudentsByDiagnosisFilter($diagnosis, $onlyBoarding) ?: [];
+        $count = 0;
+        foreach ($matches as $m) {
+          $this->assignOne((int)$m->id, $user_id, $role);
+          $count++;
+        }
+        $_SESSION['success'] = $count . ' student' . ($count !== 1 ? 's' : '') . ' assigned.';
       }
 
       header('Location: ' . ROOT . '/admin/assign_students');
       exit();
     }
 
-    // Build assignment map: staff_id => [student, student, ...]
-    // so the view can loop staff and show their students under them
     $assignments = [];
-    foreach (array_merge($nurses, $teachers, $therapists) as $staff) {
+    foreach (array_merge($nurses, $teachers, $therapists, $boardingStaff) as $staff) {
       $assignments[$staff->id] = $this->adminModel->getStudentsForStaff($staff->id, $staff->role);
     }
 
     $this->view('admin/assign-students', [
-      'nurses'      => $nurses,
-      'teachers'    => $teachers,
-      'therapists'  => $therapists,
-      'students'    => $students,
-      'assignments' => $assignments,
+      'nurses'           => $nurses,
+      'teachers'         => $teachers,
+      'therapists'       => $therapists,
+      'boardingStaff'    => $boardingStaff,
+      'students'         => $students,
+      'boardingStudents' => $boardingStudents,
+      'assignments'      => $assignments,
+      'diagnoses'        => $this->adminModel->getDistinctDiagnoses() ?: [],
     ]);
+  }
+
+  // Assign one student to one staff member, routing nurses to nurse_student
+  private function assignOne($studentId, $userId, $role)
+  {
+    if (!$studentId || !$userId) {
+      return;
+    }
+    if ($role === 'nurse') {
+      $this->adminModel->assignStudentToNurse($studentId, $userId);
+    } else {
+      $this->adminModel->assignStudentToStaff($studentId, $userId, $role);
+    }
   }
 
   // The fixed set of categories a goal (bank entry or student goal) may use
@@ -383,7 +422,7 @@ class AdminController extends Controller
     ];
   }
 
-  // /admin/goal-bank — list every bank entry
+  //list every bank entry
   public function goal_bank()
   {
     $entries = $this->goalBankModel->getAll();
@@ -393,7 +432,6 @@ class AdminController extends Controller
     ]);
   }
 
-  // /admin/add-goal-bank
   public function add_goal_bank()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -424,7 +462,6 @@ class AdminController extends Controller
     ]);
   }
 
-  // /admin/edit-goal-bank/{id}
   public function edit_goal_bank($id)
   {
     $entry = $this->goalBankModel->first(['id' => (int)$id]);
@@ -462,7 +499,6 @@ class AdminController extends Controller
     ]);
   }
 
-  // /admin/toggle-goal-bank — turn an entry on or off
   public function toggle_goal_bank()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -489,7 +525,7 @@ class AdminController extends Controller
     ];
   }
 
-  // /admin/teacch-tasks — list every TEACCH task bank entry
+  //list every TEACCH task bank entry
   public function teacch_tasks()
   {
     $entries = $this->taskBankModel->getAll();
@@ -499,7 +535,6 @@ class AdminController extends Controller
     ]);
   }
 
-  // /admin/add-teacch-task
   public function add_teacch_task()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -530,7 +565,6 @@ class AdminController extends Controller
     ]);
   }
 
-  // /admin/edit-teacch-task/{id}
   public function edit_teacch_task($id)
   {
     $entry = $this->taskBankModel->first(['id' => (int)$id]);
@@ -568,7 +602,7 @@ class AdminController extends Controller
     ]);
   }
 
-  // /admin/toggle-teacch-task — turn an entry on or off
+  //turn an entry on or off
   public function toggle_teacch_task()
   {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -709,29 +743,77 @@ class AdminController extends Controller
       exit();
     }
 
-    $goals       = $this->adminModel->getIepGoalsForStudent($studentId)        ?: [];
-    $milestones  = $this->adminModel->getMilestonesForStudent($studentId)      ?: [];
-    $progress    = $this->adminModel->getGoalProgressForStudent($studentId)    ?: [];
-    $teacch      = $this->adminModel->getTeacchProgressForStudent($studentId)  ?: [];
-    $sessions    = $this->adminModel->getClassroomSessionsForStudent($studentId) ?: [];
-    $therapies   = $this->adminModel->getTherapySessionsForStudent($studentId) ?: [];
-    $observ      = $this->adminModel->getObservationsForStudent($studentId)    ?: [];
-    $reports     = $this->adminModel->getProgressReportsForStudent($studentId) ?: [];
-    $homework    = $this->adminModel->getHomeworkForStudent($studentId)        ?: [];
-    $staff       = $this->adminModel->getAssignedStaffForStudent($studentId)   ?: [];
+    $reportModel = new StudentReport();
+    $reportData  = $reportModel->build($studentId);
 
     $this->view('admin/student-report', [
-      'student'    => $student,
-      'goals'      => $goals,
-      'milestones' => $milestones,
-      'progress'   => $progress,
-      'teacch'     => $teacch,
-      'sessions'   => $sessions,
-      'therapies'  => $therapies,
-      'observ'     => $observ,
-      'reports'    => $reports,
-      'homework'   => $homework,
-      'staff'      => $staff,
+      'reportData'    => $reportData,
+      'boardingStats' => !empty($student->is_boarding) ? $reportModel->boardingStats($studentId) : null,
+      'preparedBy'    => $_SESSION['user_name'] ?? '',
+    ]);
+  }
+
+  public function share_report()
+  {
+    $studentId = (int)($_POST['student_id'] ?? 0);
+    if ($studentId) {
+      $this->adminModel->shareReport($studentId, $_SESSION['user_id']);
+      $_SESSION['success'] = 'Report shared with the parent.';
+    }
+    header('Location: ' . ROOT . '/admin/student_report/' . $studentId);
+    exit();
+  }
+
+  public function student_reports()
+  {
+    $name      = $_GET['name'] ?? '';
+    $diagnosis = $_GET['diagnosis'] ?? '';
+
+    $students = $this->adminModel->searchStudents($name, $diagnosis) ?: [];
+
+    $this->view('admin/student-reports', [
+      'students'  => $students,
+      'diagnoses' => $this->adminModel->getDistinctDiagnoses() ?: [],
+      'name'      => $name,
+      'diagnosis' => $diagnosis,
+    ]);
+  }
+
+  public function share_all()
+  {
+    $ids = $_POST['student_ids'] ?? [];
+    $count = 0;
+    foreach ($ids as $sid) {
+      $sid = (int)$sid;
+      if ($sid) {
+        $this->adminModel->shareReport($sid, $_SESSION['user_id']);
+        $count++;
+      }
+    }
+    $_SESSION['success'] = $count . ' report' . ($count !== 1 ? 's' : '') . ' shared with parents.';
+    header('Location: ' . ROOT . '/admin/student_reports');
+    exit();
+  }
+
+  public function print_reports()
+  {
+    $name      = $_GET['name'] ?? '';
+    $diagnosis = $_GET['diagnosis'] ?? '';
+
+    $students    = $this->adminModel->searchStudents($name, $diagnosis) ?: [];
+    $reportModel = new StudentReport();
+
+    $bundle = [];
+    foreach ($students as $s) {
+      $bundle[] = [
+        'reportData'    => $reportModel->build((int)$s->id),
+        'boardingStats' => !empty($s->is_boarding) ? $reportModel->boardingStats((int)$s->id) : null,
+      ];
+    }
+
+    $this->view('admin/print-reports', [
+      'bundle'     => $bundle,
+      'preparedBy' => $_SESSION['user_name'] ?? '',
     ]);
   }
 }

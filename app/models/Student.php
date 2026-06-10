@@ -27,4 +27,16 @@ class Student extends Model
              ORDER BY last_name ASC"
         );
     }
+
+    // Only the students marked as boarding
+    public function getBoardingStudents()
+    {
+        return $this->query(
+            "SELECT *
+             FROM students
+             WHERE is_active = 1
+               AND is_boarding = 1
+             ORDER BY last_name ASC"
+        );
+    }
 }

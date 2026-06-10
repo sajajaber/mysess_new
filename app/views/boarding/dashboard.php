@@ -22,7 +22,6 @@ require_once __DIR__ . '/../components/alert.php';
   ?>
 </div>
 
-<!-- Recent daily logs -->
 <div id="sec-logs">
 <?php
 $data    = $recentLogs ?? [];
@@ -40,7 +39,6 @@ require __DIR__ . '/../components/data_table.php';
 ?>
 </div>
 
-<!-- Recent check-ins / check-outs -->
 <div id="sec-checkins" style="margin-top:24px;">
 <?php
 $data    = $recentCheck ?? [];

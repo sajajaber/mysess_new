@@ -30,7 +30,7 @@ $showArchived = isset($_GET['archived']);
 
 <?php
 $data = $students;
-$headers = ['Name', 'Date of Birth', 'Diagnosis', 'Enrolled', 'Status', 'Actions'];
+$headers = ['Name', 'Date of Birth', 'Diagnosis', 'Boarding', 'Enrolled', 'Status', 'Actions'];
 $renderRow = function ($student) {
     ob_start();
 ?>
@@ -47,6 +47,13 @@ $renderRow = function ($student) {
         </td>
         <td>
             <?= esc( $student->diagnosis ?? '—' ) ?>
+        </td>
+        <td>
+            <?php if (!empty($student->is_boarding)): ?>
+                <span class="status-badge status-active">Boarding</span>
+            <?php else: ?>
+                <span class="muted">—</span>
+            <?php endif; ?>
         </td>
         <td>
             <?= date( 'd-m-Y' , strtotime( $student->enrollment_date ) ) ?>

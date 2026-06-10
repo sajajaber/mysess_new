@@ -26,7 +26,7 @@ class BoardingController extends Controller
 
   public function dashboard()
   {
-    $students = $this->studentModel->getAllActive();
+    $students = $this->studentModel->getBoardingStudents();
 
     $this->view('boarding/dashboard', [
       'studentCount' => count($students ?: []),
@@ -39,7 +39,7 @@ class BoardingController extends Controller
 
   public function students()
   {
-    $students = $this->studentModel->getAllActive();
+    $students = $this->studentModel->getBoardingStudents();
     $this->view('boarding/students', ['students' => $students ?: []]);
   }
 
@@ -221,6 +221,14 @@ class BoardingController extends Controller
     }
 
     $this->view('boarding/add-activity', ['student' => $student]);
+  }
+
+
+  public function homework()
+  {
+    $homeworkModel = new Homework();
+    $homework = $homeworkModel->getForBoardingStaff($_SESSION['user_id']);
+    $this->view('boarding/homework', ['homework' => $homework ?: []]);
   }
 
 

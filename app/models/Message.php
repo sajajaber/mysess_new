@@ -119,7 +119,7 @@ class Message extends Model
                             u.role
                      FROM users u
                      WHERE u.is_active = 1
-                     AND u.id != :user_id
+                     AND u.id != :user_id_a
                      AND (
                             u.role IN ('admin','nurse','teacher','therapist')
 
@@ -133,7 +133,7 @@ class Message extends Model
                                     FROM students s
                                     JOIN nurse_student ns
                                         ON s.id = ns.student_id
-                                    WHERE ns.nurse_id = :user_id
+                                    WHERE ns.nurse_id = :user_id_b
                                     AND s.guardian_id IS NOT NULL
 
                                     UNION
@@ -142,14 +142,18 @@ class Message extends Model
                                     FROM students s
                                     JOIN student_assignments sa
                                         ON s.id = sa.student_id
-                                    WHERE sa.user_id = :user_id
+                                    WHERE sa.user_id = :user_id_c
                                     AND sa.end_date IS NULL
                                     AND s.guardian_id IS NOT NULL
                                 )
                             )
                         )
                      ORDER BY u.role ASC, u.last_name ASC",
-          ['user_id' => $user_id]
+          [
+            'user_id_a' => $user_id,
+            'user_id_b' => $user_id,
+            'user_id_c' => $user_id,
+          ]
         );
 
       case 'parent':
@@ -162,7 +166,7 @@ class Message extends Model
                             u.role
                      FROM users u
                      WHERE u.is_active = 1
-                     AND u.id != :user_id
+                     AND u.id != :user_id_a
                      AND (
                             u.role = 'admin'
 
@@ -173,7 +177,7 @@ class Message extends Model
                                 FROM nurse_student ns
                                 JOIN students s
                                     ON ns.student_id = s.id
-                                WHERE s.guardian_id = :user_id
+                                WHERE s.guardian_id = :user_id_b
                             )
 
                             OR
@@ -183,11 +187,28 @@ class Message extends Model
                                 FROM student_assignments sa
                                 JOIN students s
                                     ON sa.student_id = s.id
-                                WHERE s.guardian_id = :user_id
+                                WHERE s.guardian_id = :user_id_c
                                 AND sa.end_date IS NULL
                             )
                         )
                      ORDER BY u.role ASC, u.last_name ASC",
+          [
+            'user_id_a' => $user_id,
+            'user_id_b' => $user_id,
+            'user_id_c' => $user_id,
+          ]
+        );
+
+      case 'security_guard':
+      case 'boarding_staff':
+
+        return $this->query(
+          "SELECT id, first_name, last_name, role
+                     FROM users
+                     WHERE is_active = 1
+                     AND id != :user_id
+                     AND role IN ('admin','teacher','therapist','nurse')
+                     ORDER BY role ASC, last_name ASC",
           ['user_id' => $user_id]
         );
 

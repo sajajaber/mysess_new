@@ -108,7 +108,6 @@ require __DIR__ . '/../components/data_table.php';
 ?>
 </div>
 
-<!-- TEACCH -->
 <div id="sec-teacch" class="section-panel">
 <?php
 $data    = $schedules ?? [];

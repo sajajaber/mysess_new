@@ -14,8 +14,6 @@ $topbarActions = '
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../components/alert.php';
 
-// Build the "goal addressed" dropdown options from this student's IEP goals.
-// The first option is blank so the therapist can leave it unselected.
 $goalOptions = ['' => '— none —'];
 foreach (($iepGoals ?? []) as $goal) {
   $goalOptions[$goal->id] = $goal->goal_description;
