@@ -15,7 +15,7 @@ $topbarActions = '
     <a href="' . ROOT . '/admin/view_student/' . $student->id . '"><button class="btn btn-primary">← Back to Profile</button></a>
 ';
 
-require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/admin_header.php';
 require_once __DIR__ . '/../components/alert.php';
 ?>
 
